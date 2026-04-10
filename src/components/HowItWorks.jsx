@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { Fragment } from 'react'
 
 const steps = [
   {
@@ -21,46 +21,67 @@ const steps = [
 export default function HowItWorks() {
   return (
     <section id="how" className="section relative">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-1/3 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-brand-blue/5 blur-[120px]" />
-      </div>
-
       <div className="container-xl">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="eyebrow">How It Works</span>
-          <h2 className="h-section mt-6">Three steps to autonomous operations.</h2>
-          <p className="mt-5 text-lg text-white/60">
+          <div className="eyebrow-mono">// DEPLOYMENT SEQUENCE</div>
+          <h2 className="h-section mt-5 text-hm-text">
+            Three steps to autonomous operations.
+          </h2>
+          <p className="mt-5 text-[17px] leading-relaxed text-hm-muted">
             Setup takes a morning. After that, HostMind runs your portfolio
             while you focus on acquisition.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-3">
+        <div className="mt-20 grid gap-8 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:gap-0">
           {steps.map((s, i) => (
-            <motion.div
-              key={s.n}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="glass-card relative p-8"
-            >
-              <div className="flex items-center gap-4">
-                <div className="font-[Sora] text-5xl font-bold text-transparent [-webkit-text-stroke:1px_rgba(34,211,238,0.5)]">
-                  {s.n}
+            <Fragment key={s.n}>
+              <StepCard step={s} />
+              {i < steps.length - 1 && (
+                <div className="hidden items-center px-4 lg:flex">
+                  <div className="connector-dashed w-full min-w-[60px]" />
                 </div>
-                <div className="h-px flex-1 bg-gradient-to-r from-brand-glow/40 to-transparent" />
-              </div>
-              <h3 className="mt-6 font-[Sora] text-xl font-semibold">
-                {s.title}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-white/65">
-                {s.desc}
-              </p>
-            </motion.div>
+              )}
+            </Fragment>
           ))}
         </div>
       </div>
     </section>
+  )
+}
+
+function StepCard({ step }) {
+  return (
+    <div className="panel bracket-corner relative overflow-hidden p-8 pt-10">
+      {/* Watermark number */}
+      <div
+        className="pointer-events-none absolute right-6 top-4 font-mono font-bold leading-none"
+        style={{
+          fontSize: 80,
+          color: 'rgba(0,200,255,0.06)',
+          letterSpacing: '-0.04em',
+        }}
+      >
+        {step.n}
+      </div>
+
+      {/* Step badge */}
+      <div
+        className="relative flex h-8 w-8 items-center justify-center font-mono text-[12px] font-bold text-hm-cyan"
+        style={{
+          border: '1px solid rgba(0,200,255,0.3)',
+          borderRadius: '50%',
+        }}
+      >
+        {step.n}
+      </div>
+
+      <h3 className="relative mt-6 font-display text-[18px] font-semibold text-hm-text">
+        {step.title}
+      </h3>
+      <p className="relative mt-3 text-[14px] leading-[1.6] text-hm-muted">
+        {step.desc}
+      </p>
+    </div>
   )
 }

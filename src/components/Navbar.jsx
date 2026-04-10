@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 
 const links = [
   { href: '#features', label: 'Features' },
@@ -20,30 +19,27 @@ export default function Navbar() {
   }, [])
 
   return (
-    <motion.header
-      initial={{ y: -24, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className={`fixed inset-x-0 top-0 z-50 transition-all ${
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'border-b border-white/10 bg-ink-950/80 backdrop-blur-xl'
+          ? 'border-b border-[rgba(0,200,255,0.1)] bg-[rgba(2,4,8,0.75)] [backdrop-filter:blur(24px)_saturate(180%)]'
           : 'border-b border-transparent bg-transparent'
       }`}
     >
       <nav className="container-xl flex h-16 items-center justify-between">
-        <a href="#top" className="flex items-center gap-2">
-          <Logo />
-          <span className="font-[Sora] text-lg font-bold tracking-tight">
+        <a href="#top" className="flex items-center gap-2.5">
+          <HexLogo />
+          <span className="font-display text-[17px] font-semibold tracking-tight text-hm-text">
             HostMind
           </span>
         </a>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-9 md:flex">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-white/70 transition hover:text-white"
+              className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-hm-muted transition-colors duration-150 hover:text-hm-cyan"
             >
               {l.label}
             </a>
@@ -51,15 +47,16 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:block">
-          <a href="#waitlist" className="btn-primary">
-            Get Early Access
+          <a href="#waitlist" className="btn-sharp-outline">
+            Get Early Access →
           </a>
         </div>
 
         <button
           aria-label="Toggle menu"
           onClick={() => setOpen((o) => !o)}
-          className="rounded-lg border border-white/10 bg-white/5 p-2 md:hidden"
+          className="border border-[rgba(0,200,255,0.2)] bg-[rgba(0,200,255,0.04)] p-2 text-hm-cyan md:hidden"
+          style={{ borderRadius: 2 }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -79,14 +76,14 @@ export default function Navbar() {
       </nav>
 
       {open && (
-        <div className="border-t border-white/10 bg-ink-950/95 backdrop-blur md:hidden">
-          <div className="container-xl flex flex-col gap-4 py-6">
+        <div className="border-t border-[rgba(0,200,255,0.1)] bg-[rgba(2,4,8,0.95)] backdrop-blur md:hidden">
+          <div className="container-xl flex flex-col gap-5 py-6">
             {links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="text-sm font-medium text-white/80"
+                className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-hm-muted"
               >
                 {l.label}
               </a>
@@ -94,35 +91,35 @@ export default function Navbar() {
             <a
               href="#waitlist"
               onClick={() => setOpen(false)}
-              className="btn-primary w-full"
+              className="btn-sharp-outline w-full"
             >
-              Get Early Access
+              Get Early Access →
             </a>
           </div>
         </div>
       )}
-    </motion.header>
+    </header>
   )
 }
 
-function Logo() {
+export function HexLogo({ size = 28 }) {
   return (
-    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="hm-grad" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stopColor="#22D3EE" />
-          <stop offset="100%" stopColor="#3B82F6" />
-        </linearGradient>
-      </defs>
-      <rect x="2" y="2" width="28" height="28" rx="8" stroke="url(#hm-grad)" strokeWidth="1.5" />
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <path
-        d="M10 22V10m0 6h12m0-6v12"
-        stroke="url(#hm-grad)"
-        strokeWidth="2.2"
-        strokeLinecap="round"
+        d="M16 2L28 9V23L16 30L4 23V9L16 2Z"
+        stroke="#00C8FF"
+        strokeWidth="1.5"
         strokeLinejoin="round"
       />
-      <circle cx="16" cy="16" r="2.2" fill="#22D3EE" />
+      <path
+        d="M16 8L23 12V20L16 24L9 20V12L16 8Z"
+        stroke="#00C8FF"
+        strokeOpacity="0.45"
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
+      <circle cx="16" cy="16" r="2.4" fill="#00C8FF" />
+      <circle cx="16" cy="16" r="4.5" stroke="#00C8FF" strokeOpacity="0.3" strokeWidth="0.8" />
     </svg>
   )
 }

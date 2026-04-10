@@ -1,16 +1,21 @@
+import { HexLogo } from './Navbar.jsx'
+
 export default function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-ink-950">
+    <footer
+      className="border-t bg-hm-bg"
+      style={{ borderColor: 'rgba(0,200,255,0.08)' }}
+    >
       <div className="container-xl py-16">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
-            <div className="flex items-center gap-2">
-              <Logo />
-              <span className="font-[Sora] text-lg font-bold tracking-tight">
+            <div className="flex items-center gap-2.5">
+              <HexLogo size={24} />
+              <span className="font-display text-[16px] font-semibold tracking-tight text-hm-text">
                 HostMind
               </span>
             </div>
-            <p className="mt-4 max-w-xs text-sm text-white/50">
+            <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-hm-muted">
               The intelligent layer between your property and the platform.
             </p>
           </div>
@@ -40,13 +45,16 @@ export default function Footer() {
           />
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
-          <p className="text-xs text-white/40">
+        <div
+          className="mt-14 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row"
+          style={{ borderColor: 'rgba(0,200,255,0.08)' }}
+        >
+          <p className="font-mono text-[11px] text-[rgba(107,127,163,0.7)]">
             © 2025 HostMind. All rights reserved.
           </p>
           <a
             href="mailto:hello@hostmind.ai"
-            className="text-xs text-white/40 transition hover:text-white/70"
+            className="font-mono text-[11px] uppercase tracking-[0.12em] text-hm-muted transition-colors duration-150 hover:text-hm-cyan"
           >
             hello@hostmind.ai
           </a>
@@ -59,15 +67,15 @@ export default function Footer() {
 function FooterCol({ title, links }) {
   return (
     <div>
-      <h4 className="text-xs font-semibold uppercase tracking-widest text-white/60">
+      <h4 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-hm-cyan">
         {title}
       </h4>
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-5 space-y-3">
         {links.map((l) => (
           <li key={l.label}>
             <a
               href={l.href}
-              className="text-sm text-white/70 transition hover:text-white"
+              className="font-mono text-[11px] uppercase tracking-[0.12em] text-hm-muted transition-colors duration-150 hover:text-hm-cyan"
             >
               {l.label}
             </a>
@@ -75,21 +83,5 @@ function FooterCol({ title, links }) {
         ))}
       </ul>
     </div>
-  )
-}
-
-function Logo() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="hm-grad-footer" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stopColor="#22D3EE" />
-          <stop offset="100%" stopColor="#3B82F6" />
-        </linearGradient>
-      </defs>
-      <rect x="2" y="2" width="28" height="28" rx="8" stroke="url(#hm-grad-footer)" strokeWidth="1.5" />
-      <path d="M10 22V10m0 6h12m0-6v12" stroke="url(#hm-grad-footer)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="16" cy="16" r="2.2" fill="#22D3EE" />
-    </svg>
   )
 }

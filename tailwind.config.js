@@ -4,47 +4,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: {
-          950: '#05070F',
-          900: '#0A0F1E',
-          800: '#111729',
-          700: '#1A2138',
-        },
-        brand: {
-          cyan: '#06B6D4',
-          blue: '#3B82F6',
-          glow: '#22D3EE',
+        hm: {
+          bg: '#020408',
+          surface: '#080D14',
+          'surface-2': '#0C131C',
+          border: 'rgba(0,200,255,0.12)',
+          'border-hi': 'rgba(0,200,255,0.45)',
+          cyan: '#00C8FF',
+          violet: '#7B2FFF',
+          green: '#00FF94',
+          text: '#F0F4FF',
+          muted: '#6B7FA3',
         },
       },
       fontFamily: {
-        sans: [
-          'Inter',
-          'Sora',
-          'ui-sans-serif',
-          'system-ui',
-          '-apple-system',
-          'Segoe UI',
-          'Roboto',
-          'sans-serif',
-        ],
+        display: ['"Space Grotesk"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
-      boxShadow: {
-        glow: '0 0 0 1px rgba(34,211,238,0.25), 0 10px 40px -10px rgba(34,211,238,0.35)',
-        card: '0 10px 30px -15px rgba(0,0,0,0.6)',
-      },
-      backgroundImage: {
-        'grid-fade':
-          'radial-gradient(ellipse at top, rgba(34,211,238,0.12), transparent 60%)',
-      },
-      animation: {
-        'pulse-slow': 'pulse 6s cubic-bezier(0.4,0,0.6,1) infinite',
-        'float': 'float 8s ease-in-out infinite',
-      },
-      keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-12px)' },
-        },
+      letterSpacing: {
+        'widest-2': '0.15em',
       },
     },
   },

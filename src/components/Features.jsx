@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion'
-
 const features = [
   {
     title: '24/7 Inbox Management',
@@ -38,36 +36,39 @@ export default function Features() {
     <section id="features" className="section relative">
       <div className="container-xl">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="eyebrow">What HostMind Does</span>
-          <h2 className="h-section mt-6">
+          <div className="eyebrow-mono">// CORE CAPABILITIES</div>
+          <h2 className="h-section mt-5 text-hm-text">
             An operating brain for your rentals.
           </h2>
-          <p className="mt-5 text-lg text-white/60">
+          <p className="mt-5 text-[17px] leading-relaxed text-hm-muted">
             Not a dashboard you log into. An autonomous layer that acts on
             your behalf across every platform, every day.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f, i) => (
-            <motion.div
+        <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((f) => (
+            <div
               key={f.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.5, delay: i * 0.05 }}
-              className="glass-card p-7"
+              className="panel panel-hover bracket-corner p-7"
             >
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-brand-cyan/20 to-brand-blue/20 text-brand-glow ring-1 ring-brand-glow/30">
+              <div
+                className="inline-flex h-11 w-11 items-center justify-center text-hm-cyan"
+                style={{
+                  background: 'rgba(0,200,255,0.08)',
+                  border: '1px solid rgba(0,200,255,0.2)',
+                  borderRadius: 2,
+                }}
+              >
                 <f.icon />
               </div>
-              <h3 className="mt-5 font-[Sora] text-xl font-semibold">
+              <h3 className="mt-5 font-display text-[16px] font-semibold text-hm-text">
                 {f.title}
               </h3>
-              <p className="mt-3 text-sm leading-relaxed text-white/65">
+              <p className="mt-3 text-[14px] leading-[1.6] text-hm-muted">
                 {f.desc}
               </p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -77,8 +78,8 @@ export default function Features() {
 
 /* ----- icons ----- */
 const baseProps = {
-  width: 24,
-  height: 24,
+  width: 20,
+  height: 20,
   viewBox: '0 0 24 24',
   fill: 'none',
   stroke: 'currentColor',
@@ -98,7 +99,7 @@ function InboxIcon() {
 function LockIcon() {
   return (
     <svg {...baseProps}>
-      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <rect x="3" y="11" width="18" height="11" rx="1" />
       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
       <circle cx="12" cy="16.5" r="1.2" fill="currentColor" />
     </svg>
@@ -115,10 +116,10 @@ function OutreachIcon() {
 function PlatformIcon() {
   return (
     <svg {...baseProps}>
-      <rect x="3" y="3" width="7" height="7" rx="1.5" />
-      <rect x="14" y="3" width="7" height="7" rx="1.5" />
-      <rect x="3" y="14" width="7" height="7" rx="1.5" />
-      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
     </svg>
   )
 }

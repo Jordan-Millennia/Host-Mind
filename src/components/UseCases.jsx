@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 
 const tabs = [
   {
@@ -60,75 +59,65 @@ export default function UseCases() {
     <section id="use-cases" className="section relative">
       <div className="container-xl">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="eyebrow">Use Cases</span>
-          <h2 className="h-section mt-6">Built for every rental model.</h2>
-          <p className="mt-5 text-lg text-white/60">
+          <div className="eyebrow-mono">// RENTAL MODELS</div>
+          <h2 className="h-section mt-5 text-hm-text">Built for every rental model.</h2>
+          <p className="mt-5 text-[17px] leading-relaxed text-hm-muted">
             Whether you run nightly stays, traveling-nurse housing, PadSplit
             co-living, or traditional leases — HostMind adapts.
           </p>
         </div>
 
         <div className="mt-12 flex flex-wrap justify-center gap-3">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setActive(t.id)}
-              className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
-                active === t.id
-                  ? 'border-brand-glow/50 bg-brand-glow/10 text-white shadow-[0_0_24px_-4px_rgba(34,211,238,0.6)]'
-                  : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+          {tabs.map((t) => {
+            const isActive = active === t.id
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActive(t.id)}
+                className={`font-mono text-[11px] font-medium uppercase tracking-[0.1em] transition-colors duration-150 ${
+                  isActive ? 'text-hm-cyan' : 'text-hm-muted hover:text-hm-text'
+                }`}
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: 2,
+                  border: isActive
+                    ? '1px solid #00C8FF'
+                    : '1px solid rgba(255,255,255,0.1)',
+                  background: isActive
+                    ? 'rgba(0,200,255,0.12)'
+                    : 'transparent',
+                }}
+              >
+                {t.label}
+              </button>
+            )
+          })}
         </div>
 
         <div className="mt-10">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current.id}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.35 }}
-              className="glass-card mx-auto max-w-4xl p-8 sm:p-10"
-            >
-              <div className="text-xs font-semibold uppercase tracking-widest text-brand-glow">
-                {current.platforms}
-              </div>
-              <h3 className="mt-3 font-[Sora] text-2xl font-bold sm:text-3xl">
-                {current.headline}
-              </h3>
-              <ul className="mt-6 grid gap-4 sm:grid-cols-2">
-                {current.points.map((p) => (
-                  <li key={p} className="flex items-start gap-3 text-sm text-white/75">
-                    <CheckIcon />
-                    <span>{p}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          </AnimatePresence>
+          <div
+            className="panel mx-auto max-w-4xl p-10 sm:p-12"
+            style={{ borderLeft: '3px solid #00C8FF' }}
+          >
+            <div className="font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-hm-cyan">
+              {current.platforms}
+            </div>
+            <h3 className="mt-4 font-display text-[24px] font-bold text-hm-text sm:text-[28px]">
+              {current.headline}
+            </h3>
+            <ul className="mt-8 grid gap-4 sm:grid-cols-2">
+              {current.points.map((p) => (
+                <li key={p} className="flex items-start gap-3 text-[14px] text-hm-text/85">
+                  <span className="mt-0.5 font-mono text-[14px] font-bold text-hm-cyan">
+                    →
+                  </span>
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
-  )
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      className="mt-0.5 h-5 w-5 flex-none text-brand-glow"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" opacity="0.4" />
-      <path d="M8 12.5l3 3 5-6" />
-    </svg>
   )
 }

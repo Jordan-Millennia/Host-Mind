@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion'
-
 const testimonials = [
   {
     stat: '4 hrs → 3 min',
@@ -7,6 +5,7 @@ const testimonials = [
       'Response time dropped from four hours to under three minutes. Our review scores jumped inside a month.',
     name: 'Marcus H.',
     role: 'STR operator · 18 units',
+    color: '#00C8FF',
   },
   {
     stat: '+22%',
@@ -14,6 +13,7 @@ const testimonials = [
       'Occupancy up 22% in 60 days. HostMind caught pricing gaps we never would have spotted across platforms.',
     name: 'Priya S.',
     role: 'Portfolio investor · 34 units',
+    color: '#7B2FFF',
   },
   {
     stat: 'Zero',
@@ -21,6 +21,7 @@ const testimonials = [
       'Zero lockouts since deploying HostMind. The smart lock automation alone paid for the entire service.',
     name: 'Devon R.',
     role: 'PadSplit host · 9 houses',
+    color: '#00C8FF',
   },
 ]
 
@@ -29,33 +30,37 @@ export default function Testimonials() {
     <section className="section relative">
       <div className="container-xl">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="eyebrow">Results</span>
-          <h2 className="h-section mt-6">
+          <div className="eyebrow-mono">// OPERATOR RESULTS</div>
+          <h2 className="h-section mt-5 text-hm-text">
             What operators see in the first 60 days.
           </h2>
         </div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
-          {testimonials.map((t, i) => (
-            <motion.figure
+        <div className="mt-16 grid gap-5 md:grid-cols-3">
+          {testimonials.map((t) => (
+            <figure
               key={t.name}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="glass-card flex h-full flex-col p-8"
+              className="panel flex h-full flex-col p-8"
+              style={{ borderLeft: `3px solid ${t.color}` }}
             >
-              <div className="bg-gradient-to-r from-brand-cyan to-brand-blue bg-clip-text font-[Sora] text-4xl font-bold text-transparent">
+              <div
+                className="font-display text-[28px] font-bold"
+                style={{ color: t.color }}
+              >
                 {t.stat}
               </div>
-              <blockquote className="mt-5 flex-1 text-sm leading-relaxed text-white/80">
+              <blockquote className="mt-5 flex-1 text-[14px] italic leading-[1.65] text-hm-text/85">
                 "{t.quote}"
               </blockquote>
-              <figcaption className="mt-6 border-t border-white/10 pt-5">
-                <div className="text-sm font-semibold text-white">{t.name}</div>
-                <div className="text-xs text-white/50">{t.role}</div>
+              <figcaption className="mt-6 border-t border-[rgba(0,200,255,0.1)] pt-5">
+                <div className="font-display text-[14px] font-semibold text-hm-text">
+                  {t.name}
+                </div>
+                <div className="mt-1 font-mono text-[11px] text-hm-muted">
+                  {t.role}
+                </div>
               </figcaption>
-            </motion.figure>
+            </figure>
           ))}
         </div>
       </div>

@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion'
-
 const tiers = [
   {
     name: 'Starter',
@@ -54,77 +52,78 @@ export default function Pricing() {
     <section id="pricing" className="section relative">
       <div className="container-xl">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="eyebrow">Pricing</span>
-          <h2 className="h-section mt-6">Simple, per-unit pricing.</h2>
-          <p className="mt-5 text-lg text-white/60">
+          <div className="eyebrow-mono">// PRICING</div>
+          <h2 className="h-section mt-5 text-hm-text">Simple, per-unit pricing.</h2>
+          <p className="mt-5 text-[17px] leading-relaxed text-hm-muted">
             Start with a handful of units. Scale to hundreds. No long-term
             contracts. Final pricing locked in at launch.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-6 lg:grid-cols-3">
-          {tiers.map((t, i) => (
-            <motion.div
+        <div className="mt-16 grid gap-5 lg:grid-cols-3">
+          {tiers.map((t) => (
+            <div
               key={t.name}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className={`relative flex flex-col rounded-2xl border p-8 ${
-                t.featured
-                  ? 'border-brand-glow/50 bg-gradient-to-b from-brand-cyan/[0.08] to-brand-blue/[0.04] shadow-[0_0_60px_-20px_rgba(34,211,238,0.5)]'
-                  : 'border-white/10 bg-white/[0.03]'
-              }`}
+              className="bracket-corner relative flex flex-col p-8"
+              style={{
+                background: t.featured ? 'rgba(0,200,255,0.05)' : '#080D14',
+                border: t.featured
+                  ? '2px solid #00C8FF'
+                  : '1px solid rgba(0,200,255,0.12)',
+                borderRadius: 2,
+                boxShadow: t.featured ? '0 0 40px rgba(0,200,255,0.12)' : 'none',
+              }}
             >
               {t.featured && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-brand-cyan to-brand-blue px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg">
-                  Most Popular
+                <div
+                  className="absolute right-0 top-0 font-mono text-[9px] font-bold uppercase tracking-[0.15em]"
+                  style={{
+                    background: '#00C8FF',
+                    color: '#020408',
+                    padding: '3px 10px',
+                    borderRadius: '0 2px 0 2px',
+                  }}
+                >
+                  Recommended
                 </div>
               )}
               <div>
-                <h3 className="font-[Sora] text-2xl font-bold">{t.name}</h3>
-                <p className="mt-2 text-sm text-white/60">{t.tagline}</p>
+                <h3 className="font-display text-[20px] font-bold text-hm-text">
+                  {t.name}
+                </h3>
+                <p className="mt-2 text-[13px] text-hm-muted">{t.tagline}</p>
               </div>
-              <div className="mt-6 flex items-baseline gap-1">
-                <span className="font-[Sora] text-4xl font-bold">{t.price}</span>
-                <span className="text-sm text-white/50">{t.unit}</span>
+              <div className="mt-8 flex items-baseline gap-2">
+                <span className="font-display text-[36px] font-bold text-hm-cyan">
+                  {t.price}
+                </span>
+                <span className="text-[16px] text-hm-muted">{t.unit}</span>
               </div>
-              <ul className="mt-8 flex-1 space-y-3">
+              <ul className="mt-8 flex-1 space-y-3.5">
                 {t.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-white/80">
-                    <CheckIcon />
+                  <li
+                    key={f}
+                    className="flex items-start gap-3 text-[13px] text-hm-text/90"
+                  >
+                    <span className="font-mono text-[13px] font-bold text-hm-cyan">
+                      →
+                    </span>
                     {f}
                   </li>
                 ))}
               </ul>
               <a
                 href="#waitlist"
-                className={`mt-8 block text-center ${
-                  t.featured ? 'btn-primary' : 'btn-secondary'
+                className={`mt-9 block text-center ${
+                  t.featured ? 'btn-sharp-primary' : 'btn-sharp-outline'
                 }`}
               >
                 {t.cta}
               </a>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
     </section>
-  )
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      className="mt-0.5 h-4 w-4 flex-none text-brand-glow"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12l5 5L20 7" />
-    </svg>
   )
 }

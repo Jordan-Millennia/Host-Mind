@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 
 // Replace YOUR_FORM_ID with the endpoint you get after creating a free form at https://formspree.io
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID'
@@ -15,7 +14,7 @@ const initialState = {
 export default function Waitlist() {
   const [form, setForm] = useState(initialState)
   const [errors, setErrors] = useState({})
-  const [status, setStatus] = useState('idle') // idle | submitting | success | error
+  const [status, setStatus] = useState('idle')
 
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value })
 
@@ -52,43 +51,41 @@ export default function Waitlist() {
 
   return (
     <section id="waitlist" className="section relative">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-cyan/10 blur-[120px]" />
-      </div>
+      <div
+        className="absolute inset-0 -z-10"
+        style={{
+          background:
+            'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(0,200,255,0.05), transparent 70%)',
+        }}
+      />
 
       <div className="container-xl">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="glass-card mx-auto max-w-3xl overflow-hidden p-8 sm:p-12"
-        >
+        <div className="panel bracket-corner mx-auto max-w-[640px] p-10 sm:p-12">
           <div className="text-center">
-            <span className="eyebrow">Early Access</span>
-            <h2 className="h-section mt-6">Get Early Access</h2>
-            <p className="mt-4 text-lg text-white/60">
+            <div className="eyebrow-mono">// EARLY ACCESS</div>
+            <h2 className="h-section mt-5 text-hm-text">Get Early Access</h2>
+            <p className="mt-4 text-[16px] leading-relaxed text-hm-muted">
               HostMind is onboarding property operators now. Join the waitlist
               and we'll reach out to get you set up.
             </p>
           </div>
 
           {status === 'success' ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mt-10 rounded-xl border border-brand-glow/40 bg-brand-glow/10 p-8 text-center"
+            <div
+              className="mt-10 p-8 text-center"
+              style={{
+                background: 'rgba(0,255,148,0.06)',
+                border: '1px solid rgba(0,255,148,0.35)',
+                borderRadius: 2,
+              }}
             >
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-glow/20 ring-1 ring-brand-glow/50">
-                <svg className="h-7 w-7 text-brand-glow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12l5 5L20 7" />
-                </svg>
+              <div className="font-mono text-[13px] text-hm-green">
+                ✓ You're on the list.
               </div>
-              <h3 className="mt-4 font-[Sora] text-xl font-bold">You're on the list.</h3>
-              <p className="mt-2 text-sm text-white/70">
+              <div className="mt-3 text-[14px] text-hm-text/80">
                 We'll be in touch shortly.
-              </p>
-            </motion.div>
+              </div>
+            </div>
           ) : (
             <form onSubmit={onSubmit} noValidate className="mt-10 space-y-5">
               <div className="grid gap-5 sm:grid-cols-2">
@@ -141,40 +138,77 @@ export default function Waitlist() {
               <button
                 type="submit"
                 disabled={status === 'submitting'}
-                className="btn-primary w-full text-base disabled:cursor-not-allowed disabled:opacity-60"
+                className="font-display text-[14px] font-bold disabled:cursor-not-allowed disabled:opacity-60"
+                style={{
+                  width: '100%',
+                  height: 48,
+                  background: '#00C8FF',
+                  color: '#020408',
+                  border: 'none',
+                  borderRadius: 2,
+                  transition: 'filter 150ms ease, box-shadow 150ms ease',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.filter = 'brightness(1.1)'
+                  e.currentTarget.style.boxShadow = '0 0 20px rgba(0,200,255,0.4)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.filter = ''
+                  e.currentTarget.style.boxShadow = ''
+                }}
               >
                 {status === 'submitting' ? 'Joining…' : 'Join the Waitlist'}
               </button>
 
               {status === 'error' && (
-                <p className="text-center text-sm text-red-300">
+                <p className="text-center font-mono text-[12px] text-red-300">
                   Something went wrong. Please try again or email hello@hostmind.ai.
                 </p>
               )}
-              <p className="text-center text-xs text-white/40">
+              <p className="text-center font-mono text-[11px] text-hm-muted">
                 No spam. We'll only reach out about your waitlist spot.
               </p>
             </form>
           )}
-        </motion.div>
+        </div>
       </div>
     </section>
   )
 }
 
+const inputStyle = (error) => ({
+  width: '100%',
+  background: 'rgba(0,200,255,0.03)',
+  border: error ? '1px solid rgba(255,100,100,0.6)' : '1px solid rgba(0,200,255,0.15)',
+  borderRadius: 2,
+  padding: '12px 14px',
+  color: '#F0F4FF',
+  fontFamily: 'Inter, sans-serif',
+  fontSize: 14,
+  outline: 'none',
+  transition: 'border-color 150ms ease, box-shadow 150ms ease',
+})
+
 function Field({ label, required, error, ...rest }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/60">
-        {label} {required && <span className="text-brand-glow">*</span>}
+      <span className="mb-2 block font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-hm-muted">
+        {label} {required && <span className="text-hm-cyan">*</span>}
       </span>
       <input
         {...rest}
-        className={`w-full rounded-lg border bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:bg-white/[0.07] ${
-          error
-            ? 'border-red-400/60 focus:border-red-400'
-            : 'border-white/10 focus:border-brand-glow/60'
-        }`}
+        style={inputStyle(error)}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = '#00C8FF'
+          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,200,255,0.15)'
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = error
+            ? 'rgba(255,100,100,0.6)'
+            : 'rgba(0,200,255,0.15)'
+          e.currentTarget.style.boxShadow = 'none'
+        }}
       />
     </label>
   )
@@ -183,24 +217,51 @@ function Field({ label, required, error, ...rest }) {
 function Select({ label, required, error, options, ...rest }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/60">
-        {label} {required && <span className="text-brand-glow">*</span>}
+      <span className="mb-2 block font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-hm-muted">
+        {label} {required && <span className="text-hm-cyan">*</span>}
       </span>
-      <select
-        {...rest}
-        className={`w-full rounded-lg border bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:bg-white/[0.07] ${
-          error
-            ? 'border-red-400/60 focus:border-red-400'
-            : 'border-white/10 focus:border-brand-glow/60'
-        }`}
-      >
-        <option value="" className="bg-ink-900">Select…</option>
-        {options.map((o) => (
-          <option key={o} value={o} className="bg-ink-900">
-            {o}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          {...rest}
+          style={{
+            ...inputStyle(error),
+            appearance: 'none',
+            WebkitAppearance: 'none',
+            MozAppearance: 'none',
+            paddingRight: 40,
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = '#00C8FF'
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,200,255,0.15)'
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = error
+              ? 'rgba(255,100,100,0.6)'
+              : 'rgba(0,200,255,0.15)'
+            e.currentTarget.style.boxShadow = 'none'
+          }}
+        >
+          <option value="">Select…</option>
+          {options.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+        <svg
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#6B7FA3"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </div>
     </label>
   )
 }
