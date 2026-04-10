@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-// Replace YOUR_FORM_ID with the endpoint you get after creating a free form at https://formspree.io
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID'
+// HostMind Waitlist — Formspree endpoint
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mwvwdjba'
 
 const initialState = {
   name: '',
