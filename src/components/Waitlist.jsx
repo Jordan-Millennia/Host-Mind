@@ -6,7 +6,6 @@ const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mwvwdjba'
 const initialState = {
   name: '',
   email: '',
-  phone: '',
   units: '',
   platform: '',
 }
@@ -107,14 +106,6 @@ export default function Waitlist() {
                   placeholder="jane@example.com"
                 />
               </div>
-
-              <Field
-                label="Phone Number"
-                type="tel"
-                value={form.phone}
-                onChange={update('phone')}
-                placeholder="(555) 123-4567"
-              />
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <Select
