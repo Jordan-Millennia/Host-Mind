@@ -1,0 +1,312 @@
+// RoomOS — Postgres schema (Phase 1)
+// Source of truth: docs/superpowers/specs/2026-05-02-roomos-phase-1-design.md §4
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = []
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================================
+// Enums
+// =====================================================================
+
+enum Platform {
+  PADSPLIT
+  AIRBNB
+  TURBOTENANT
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  OWNER  // unused in Phase 1; reserved for owner portal
+}
+
+enum OccupancyStatus {
+  OCCUPIED
+  MOVING_IN
+  MOVING_OUT
+  VACANT
+  NEEDS_FLIP
+  WAITING_APPROVAL
+  INACTIVE
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  FAILED
+}
+
+enum SyncKind {
+  DISCOVERY
+  OCCUPANCY
+  FINANCIAL
+  INTERACTIVE_LOGIN
+}
+
+enum SyncRunStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+enum PaymentEventType {
+  PAYMENT
+  ADJUSTMENT
+}
+
+// =====================================================================
+// Tenancy
+// =====================================================================
+
+model Org {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  owners      Owner[]
+  properties  Property[]
+  rooms       Room[]
+  listings    PlatformListing[]
+  members     Member[]
+  occupancies Occupancy[]
+  payments    PaymentEvent[]
+  teamUsers   TeamUser[]
+  syncRuns    SyncRun[]
+  auditLogs   AuditLog[]
+
+  @@map("orgs")
+}
+
+model Owner {
+  id              String   @id @default(cuid())
+  orgId           String   @map("org_id")
+  name            String
+  email           String?
+  phone           String?
+  billingTerms    String?  @map("billing_terms")
+  statementEmail  String?  @map("statement_email")
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  org        Org        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  properties Property[]
+  teamUsers  TeamUser[]
+
+  @@index([orgId])
+  @@map("owners")
+}
+
+// =====================================================================
+// Portfolio
+// =====================================================================
+
+model Property {
+  id        String   @id @default(cuid())
+  orgId     String   @map("org_id")
+  ownerId   String?  @map("owner_id")  // nullable until mapped during bootstrap
+  name      String?
+  address   String
+  city      String?
+  state     String?
+  zip       String?
+  market    String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  org   Org    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  owner Owner? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  rooms Room[]
+
+  @@index([orgId])
+  @@index([ownerId])
+  @@map("properties")
+}
+
+model Room {
+  id           String   @id @default(cuid())
+  orgId        String   @map("org_id")
+  propertyId   String   @map("property_id")
+  name         String?
+  roomNumber   String?  @map("room_number")
+  maxOccupancy Int      @default(1) @map("max_occupancy")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  org      Org              @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  property Property         @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  listings PlatformListing[]
+
+  @@index([orgId])
+  @@index([propertyId])
+  @@map("rooms")
+}
+
+model PlatformListing {
+  id                  String         @id @default(cuid())
+  orgId               String         @map("org_id")
+  roomId              String         @map("room_id")
+  platform            Platform
+  externalListingId   String?        @map("external_listing_id")
+  externalPropertyId  String?        @map("external_property_id")
+  isActive            Boolean        @default(true) @map("is_active")
+  lastSyncedAt        DateTime?      @map("last_synced_at")
+  sessionStatus       SessionStatus  @default(ACTIVE) @map("session_status")
+  createdAt           DateTime       @default(now()) @map("created_at")
+  updatedAt           DateTime       @updatedAt @map("updated_at")
+
+  org         Org          @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  occupancies Occupancy[]
+
+  @@unique([roomId, platform])
+  @@index([orgId, platform])
+  @@map("platform_listings")
+}
+
+// =====================================================================
+// People (members) — distinct from team_users
+// =====================================================================
+
+model Member {
+  id               String   @id @default(cuid())
+  orgId            String   @map("org_id")
+  platform         Platform
+  externalMemberId String   @map("external_member_id")
+  name             String
+  email            String?
+  phone            String?
+  photoUrl         String?  @map("photo_url")
+  profileUrl       String?  @map("profile_url")
+  firstSeenAt      DateTime @default(now()) @map("first_seen_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  org           Org             @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  occupancies   Occupancy[]
+  paymentEvents PaymentEvent[]
+
+  @@unique([platform, externalMemberId])
+  @@index([orgId])
+  @@map("members")
+}
+
+// =====================================================================
+// Occupancy & financial state
+// =====================================================================
+
+model Occupancy {
+  id                   String          @id @default(cuid())
+  orgId                String          @map("org_id")
+  listingId            String          @map("listing_id")
+  memberId             String?         @map("member_id")
+  status               OccupancyStatus
+  moveInDate           DateTime?       @map("move_in_date") @db.Date
+  leaseEndDate         DateTime?       @map("lease_end_date") @db.Date
+
+  // Denormalized financial state for fast dashboard reads
+  currentBalance       Decimal?        @map("current_balance") @db.Decimal(10, 2)
+  daysPastDue          Int?            @map("days_past_due")
+  lastPaymentAt        DateTime?       @map("last_payment_at")
+  lastPaymentAmount    Decimal?        @map("last_payment_amount") @db.Decimal(10, 2)
+  lastFinancialSyncAt  DateTime?       @map("last_financial_sync_at")
+
+  scrapedAt            DateTime?       @map("scraped_at")
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+
+  org           Org              @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  listing       PlatformListing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  member        Member?          @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  paymentEvents PaymentEvent[]
+
+  @@index([orgId, status])
+  @@index([listingId])
+  @@index([memberId])
+  @@map("occupancies")
+}
+
+model PaymentEvent {
+  id              String           @id @default(cuid())
+  orgId           String           @map("org_id")
+  memberId        String           @map("member_id")
+  occupancyId     String?          @map("occupancy_id")
+  amount          Decimal          @db.Decimal(10, 2)
+  eventType       PaymentEventType @map("event_type")
+  eventDate       DateTime         @map("event_date") @db.Date
+  source          String           @default("PADSPLIT_SCRAPE")
+  externalEventId String           @map("external_event_id")
+  rawJson         Json?            @map("raw_json")
+  detectedAt      DateTime         @default(now()) @map("detected_at")
+
+  org       Org        @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  member    Member     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  occupancy Occupancy? @relation(fields: [occupancyId], references: [id], onDelete: SetNull)
+
+  @@unique([memberId, externalEventId])
+  @@index([orgId, eventDate])
+  @@map("payment_events")
+}
+
+// =====================================================================
+// Auth, ops, audit
+// =====================================================================
+
+model TeamUser {
+  id          String   @id @default(cuid())
+  orgId       String   @map("org_id")
+  clerkUserId String   @unique @map("clerk_user_id")
+  email       String
+  role        Role     @default(AGENT)
+  ownerId     String?  @map("owner_id")  // for future owner-portal users
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  org   Org    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  owner Owner? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@index([orgId])
+  @@map("team_users")
+}
+
+model SyncRun {
+  id             String        @id @default(cuid())
+  orgId          String        @map("org_id")
+  kind           SyncKind
+  platform       Platform
+  startedAt      DateTime      @default(now()) @map("started_at")
+  completedAt    DateTime?     @map("completed_at")
+  status         SyncRunStatus @default(RUNNING)
+  itemsSynced    Int           @default(0) @map("items_synced")
+  errorsJson     Json?         @map("errors_json")
+  screenshotsJson Json?        @map("screenshots_json")
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, kind, startedAt])
+  @@map("sync_runs")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  orgId         String   @map("org_id")
+  actorUserId   String?  @map("actor_user_id")  // null = system action
+  action        String
+  entityType    String   @map("entity_type")
+  entityId      String   @map("entity_id")
+  metadataJson  Json?    @map("metadata_json")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, createdAt])
+  @@map("audit_log")
+}
