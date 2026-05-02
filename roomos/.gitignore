@@ -11,4 +11,12 @@ out/
 .turbo
 .claude/settings.local.json
 .superpowers/
-packages/db/prisma/migrations/migration_lock.toml.bak
+
+# TypeScript / build artifacts
+*.tsbuildinfo
+
+# Test artifacts
+/coverage
+/test-results
+/playwright-report
+/.playwright
