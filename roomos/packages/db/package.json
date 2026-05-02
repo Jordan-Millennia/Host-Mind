@@ -1,0 +1,14 @@
+{
+  "name": "@roomos/db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "echo 'no lint'",
+    "typecheck": "tsc --noEmit",
+    "build": "echo 'no build'",
+    "test": "echo 'no tests'"
+  },
+  "prisma": { "seed": "tsx prisma/seed.ts" }
+}

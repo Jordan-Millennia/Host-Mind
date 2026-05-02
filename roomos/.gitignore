@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.next/
+out/
+.DS_Store
+*.log
+.env
+.env.local
+.env.*.local
+.vite
+.turbo
+.claude/settings.local.json
+.superpowers/
+packages/db/prisma/migrations/migration_lock.toml.bak
