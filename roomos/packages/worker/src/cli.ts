@@ -21,8 +21,14 @@ async function main() {
 
     case "run": {
       const job = parseFlag(rest, "--job") ?? ""
-      log.info({ job }, "run-once not yet implemented (Tasks 6–8)")
-      return
+      if (job === "padsplit:discovery") {
+        const { runDiscovery } = await import("./padsplit/discovery.js")
+        const result = await runDiscovery()
+        log.info(result, "discovery complete")
+        return
+      }
+      log.error({ job }, "unknown job")
+      process.exit(1)
     }
 
     case "scheduler": {
