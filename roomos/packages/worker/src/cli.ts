@@ -44,7 +44,8 @@ async function main() {
     }
 
     case "scheduler": {
-      log.info("scheduler not yet implemented (Task 9)")
+      const { startScheduler } = await import("./scheduler.js")
+      await startScheduler()
       return
     }
 
