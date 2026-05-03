@@ -1,17 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const mockAuth = vi.fn()
+const mockGetUser = vi.fn()
 const mockOrgFindFirst = vi.fn()
 const mockTeamUserFindUnique = vi.fn()
+const mockTeamUserUpsert = vi.fn()
 
 vi.mock("@clerk/nextjs/server", () => ({
   auth: () => mockAuth(),
+  clerkClient: async () => ({ users: { getUser: (...a: unknown[]) => mockGetUser(...a) } }),
 }))
 
 vi.mock("@roomos/db", () => ({
   prisma: {
     org: { findFirst: (...a: unknown[]) => mockOrgFindFirst(...a) },
-    teamUser: { findUnique: (...a: unknown[]) => mockTeamUserFindUnique(...a) },
+    teamUser: {
+      findUnique: (...a: unknown[]) => mockTeamUserFindUnique(...a),
+      upsert: (...a: unknown[]) => mockTeamUserUpsert(...a),
+    },
   },
 }))
 
@@ -20,8 +26,10 @@ import { resolveContext, requireRole } from "@/lib/auth"
 describe("resolveContext", () => {
   beforeEach(() => {
     mockAuth.mockReset()
+    mockGetUser.mockReset()
     mockOrgFindFirst.mockResolvedValue({ id: "org_x" })
     mockTeamUserFindUnique.mockReset()
+    mockTeamUserUpsert.mockReset()
   })
 
   it("returns null when user is not signed in", async () => {
@@ -30,14 +38,67 @@ describe("resolveContext", () => {
     expect(ctx).toBeNull()
   })
 
-  it("returns null when team_user is missing (webhook lag)", async () => {
+  it("lazy-provisions a team_user on first sign-in (webhook lag)", async () => {
     mockAuth.mockResolvedValue({ userId: "user_lag" })
     mockTeamUserFindUnique.mockResolvedValue(null)
+    mockGetUser.mockResolvedValue({
+      emailAddresses: [{ emailAddress: "lag@cohostmgmt.net" }],
+    })
+    mockTeamUserUpsert.mockResolvedValue({
+      id: "tu_lag",
+      orgId: "org_x",
+      clerkUserId: "user_lag",
+      email: "lag@cohostmgmt.net",
+      role: "AGENT",
+      ownerId: null,
+    })
+
     const ctx = await resolveContext()
-    expect(ctx).toBeNull()
+
+    expect(mockTeamUserUpsert).toHaveBeenCalledWith({
+      where: { clerkUserId: "user_lag" },
+      create: { orgId: "org_x", clerkUserId: "user_lag", email: "lag@cohostmgmt.net", role: "AGENT" },
+      update: {},
+    })
+    expect(ctx).toEqual({
+      userId: "user_lag",
+      teamUserId: "tu_lag",
+      orgId: "org_x",
+      role: "AGENT",
+      ownerId: null,
+    })
   })
 
-  it("returns the resolved context for a signed-in agent", async () => {
+  it("falls back to empty email when Clerk lookup throws (still provisions)", async () => {
+    mockAuth.mockResolvedValue({ userId: "user_no_email" })
+    mockTeamUserFindUnique.mockResolvedValue(null)
+    mockGetUser.mockRejectedValue(new Error("clerk timeout"))
+    mockTeamUserUpsert.mockResolvedValue({
+      id: "tu_x", orgId: "org_x", clerkUserId: "user_no_email",
+      email: "", role: "AGENT", ownerId: null,
+    })
+
+    const ctx = await resolveContext()
+
+    expect(mockTeamUserUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({ email: "" }),
+      }),
+    )
+    expect(ctx?.userId).toBe("user_no_email")
+  })
+
+  it("returns null when org is not seeded (deployment misconfig)", async () => {
+    mockAuth.mockResolvedValue({ userId: "user_no_org" })
+    mockTeamUserFindUnique.mockResolvedValue(null)
+    mockOrgFindFirst.mockResolvedValueOnce(null)
+
+    const ctx = await resolveContext()
+    expect(ctx).toBeNull()
+    expect(mockTeamUserUpsert).not.toHaveBeenCalled()
+  })
+
+  it("returns the resolved context for an existing signed-in agent (no upsert)", async () => {
     mockAuth.mockResolvedValue({ userId: "user_alice" })
     mockTeamUserFindUnique.mockResolvedValue({
       id: "tu_alice",
@@ -55,6 +116,7 @@ describe("resolveContext", () => {
       role: "AGENT",
       ownerId: null,
     })
+    expect(mockTeamUserUpsert).not.toHaveBeenCalled()
   })
 })
 
