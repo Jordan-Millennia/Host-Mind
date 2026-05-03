@@ -12,9 +12,12 @@ export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     await auth.protect()
   }
-  const res = NextResponse.next()
-  res.headers.set("x-pathname", req.nextUrl.pathname)
-  return res
+  // Forward the pathname on the REQUEST headers (not response headers) so
+  // server components can read it via `await headers()`. Response headers
+  // travel to the client and are NOT visible to RSC.
+  const requestHeaders = new Headers(req.headers)
+  requestHeaders.set("x-pathname", req.nextUrl.pathname)
+  return NextResponse.next({ request: { headers: requestHeaders } })
 })
 
 export const config = {

@@ -5,9 +5,16 @@ import { env } from "./env"
 
 /**
  * Verify a Clerk webhook signature against `CLERK_WEBHOOK_SECRET`.
- * Returns the parsed event; throws on signature failure.
+ * Returns the parsed event; throws on signature failure or missing secret.
  */
 export function verifyClerkWebhook(headers: Headers, rawBody: string): WebhookEvent {
+  if (!env.CLERK_WEBHOOK_SECRET) {
+    throw new Error(
+      "CLERK_WEBHOOK_SECRET is not set — Clerk webhook is disabled. " +
+        "Provision it via the Clerk dashboard and add to .env.local / Railway env vars.",
+    )
+  }
+
   const svixId = headers.get("svix-id")
   const svixTimestamp = headers.get("svix-timestamp")
   const svixSignature = headers.get("svix-signature")

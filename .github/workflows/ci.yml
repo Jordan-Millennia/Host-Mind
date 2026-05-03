@@ -50,4 +50,12 @@ jobs:
       - name: Unit tests
         run: pnpm test
       - name: Migration drift check
-        run: pnpm --filter @roomos/db prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-migrations prisma/migrations --exit-code
+        run: |
+          # Prisma's `migrate diff --from-migrations` needs a shadow DB to
+          # replay migrations into. Spin one up alongside the CI Postgres.
+          PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c "CREATE DATABASE roomos_drift;"
+          pnpm --filter @roomos/db exec prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --to-schema-datamodel prisma/schema.prisma \
+            --shadow-database-url "postgresql://postgres:postgres@localhost:5432/roomos_drift?schema=public" \
+            --exit-code
