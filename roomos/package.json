@@ -9,11 +9,11 @@
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "db:generate": "pnpm --filter @roomos/db prisma generate",
-    "db:migrate": "pnpm --filter @roomos/db prisma migrate dev",
-    "db:migrate:deploy": "pnpm --filter @roomos/db prisma migrate deploy",
-    "db:seed": "pnpm --filter @roomos/db prisma db seed",
-    "db:studio": "pnpm --filter @roomos/db prisma studio"
+    "db:generate": "pnpm --filter @roomos/db exec prisma generate",
+    "db:migrate": "pnpm --filter @roomos/db exec prisma migrate dev",
+    "db:migrate:deploy": "pnpm --filter @roomos/db exec prisma migrate deploy",
+    "db:seed": "pnpm --filter @roomos/db exec prisma db seed",
+    "db:studio": "pnpm --filter @roomos/db exec prisma studio"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

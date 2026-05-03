@@ -14,6 +14,7 @@
     "seed": "node_modules/.bin/tsx prisma/seed.ts"
   },
   "devDependencies": {
+    "@types/node": "^20",
     "prisma": "^5.22.0",
     "tsx": "^4.21.0"
   },

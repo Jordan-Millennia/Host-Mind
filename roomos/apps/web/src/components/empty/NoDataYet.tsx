@@ -10,7 +10,7 @@ export function NoDataYet() {
         No rooms <span className="italic text-[color:var(--color-muted)]">— yet.</span>
       </h1>
       <p className="mt-6 text-base leading-relaxed text-[color:var(--color-muted)] max-w-md mx-auto">
-        RoomOS hasn't been connected to PadSplit yet. Once you log in once on this Mac, the scraper
+        RoomOS hasn&apos;t been connected to PadSplit yet. Once you log in once on this Mac, the scraper
         will discover all 70 properties and populate this view.
       </p>
       <div className="mt-10 flex justify-center gap-3">
@@ -23,7 +23,7 @@ export function NoDataYet() {
         </Link>
       </div>
       <p className="mt-12 text-[11px] text-[color:var(--color-muted)] italic">
-        The "Connect PadSplit" flow lands in Phase 1D.
+        The &quot;Connect PadSplit&quot; flow lands in Phase 1D.
       </p>
     </section>
   )
