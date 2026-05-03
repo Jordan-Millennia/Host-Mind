@@ -27,6 +27,12 @@ async function main() {
         log.info(result, "discovery complete")
         return
       }
+      if (job === "padsplit:occupancy") {
+        const { runOccupancy } = await import("./padsplit/occupancy.js")
+        const result = await runOccupancy()
+        log.info(result, "occupancy complete")
+        return
+      }
       log.error({ job }, "unknown job")
       process.exit(1)
     }

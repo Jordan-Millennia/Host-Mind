@@ -122,3 +122,80 @@ export type ParsedRoomState = {
   moveInDate: string | null
   leaseEndDate: string | null
 }
+
+export async function upsertMember(args: {
+  orgId: string
+  externalMemberId: string
+  name: string
+  profileUrl?: string
+}): Promise<{ id: string }> {
+  return prisma.member.upsert({
+    where: {
+      platform_externalMemberId: { platform: "PADSPLIT" as Platform, externalMemberId: args.externalMemberId },
+    },
+    create: {
+      orgId: args.orgId,
+      platform: "PADSPLIT",
+      externalMemberId: args.externalMemberId,
+      name: args.name,
+      profileUrl: args.profileUrl,
+    },
+    update: { name: args.name, profileUrl: args.profileUrl },
+    select: { id: true },
+  })
+}
+
+export async function upsertOccupancy(args: {
+  orgId: string
+  listingId: string
+  memberId: string | null
+  status: OccupancyStatus
+  moveInDate: string | null
+  leaseEndDate: string | null
+}): Promise<void> {
+  // Find the most-recent active occupancy for this listing.
+  const existing = await prisma.occupancy.findFirst({
+    where: {
+      orgId: args.orgId,
+      listingId: args.listingId,
+      status: { in: ["OCCUPIED", "MOVING_IN", "MOVING_OUT"] },
+    },
+    orderBy: { createdAt: "desc" },
+  })
+
+  // If the same member is still in the same listing, just update the status/dates.
+  if (existing && existing.memberId === args.memberId) {
+    await prisma.occupancy.update({
+      where: { id: existing.id },
+      data: {
+        status: args.status,
+        moveInDate: args.moveInDate ? new Date(args.moveInDate) : null,
+        leaseEndDate: args.leaseEndDate ? new Date(args.leaseEndDate) : null,
+        scrapedAt: new Date(),
+      },
+    })
+    return
+  }
+
+  // Different member (or now vacant) — close the old, open the new.
+  if (existing) {
+    await prisma.occupancy.update({
+      where: { id: existing.id },
+      data: { status: "INACTIVE", scrapedAt: new Date() },
+    })
+  }
+
+  if (args.memberId || args.status !== "VACANT") {
+    await prisma.occupancy.create({
+      data: {
+        orgId: args.orgId,
+        listingId: args.listingId,
+        memberId: args.memberId,
+        status: args.status,
+        moveInDate: args.moveInDate ? new Date(args.moveInDate) : null,
+        leaseEndDate: args.leaseEndDate ? new Date(args.leaseEndDate) : null,
+        scrapedAt: new Date(),
+      },
+    })
+  }
+}
