@@ -13,7 +13,10 @@
     "db:migrate": "pnpm --filter @roomos/db exec prisma migrate dev",
     "db:migrate:deploy": "pnpm --filter @roomos/db exec prisma migrate deploy",
     "db:seed": "pnpm --filter @roomos/db exec prisma db seed",
-    "db:studio": "pnpm --filter @roomos/db exec prisma studio"
+    "db:studio": "pnpm --filter @roomos/db exec prisma studio",
+    "worker:dev": "pnpm --filter @roomos/worker dev",
+    "worker:build": "pnpm --filter @roomos/worker build",
+    "worker:scheduler": "pnpm --filter @roomos/worker dev scheduler"
   },
   "devDependencies": {
     "prettier": "^3.3.3",
