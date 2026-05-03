@@ -11,7 +11,7 @@
     "test": "echo 'no tests'"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "node_modules/.bin/tsx prisma/seed.ts"
   },
   "devDependencies": {
     "prisma": "^5.22.0",

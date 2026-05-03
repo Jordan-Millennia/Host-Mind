@@ -17,6 +17,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@roomos/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       clsx:
         specifier: ^2.1.1
         version: 2.1.1

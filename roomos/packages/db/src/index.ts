@@ -1,1 +1,2 @@
-export {} // populated in Task 4 once Prisma is set up
+export { prisma } from "./client"
+export * from "@prisma/client"
