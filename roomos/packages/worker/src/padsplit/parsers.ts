@@ -97,3 +97,30 @@ export function parseListingPage(html: string): ParsedListingPage {
 
   return { address, city, status, rooms }
 }
+
+export type ParsedMemberProfile = {
+  balance: string | null            // decimal string, e.g. "420.00"
+  daysPastDue: number | null
+  lastPaymentAmount: string | null  // decimal string
+  lastPaymentDate: string | null    // ISO YYYY-MM-DD
+}
+
+export function parseMemberProfile(html: string): ParsedMemberProfile {
+  const dom = new JSDOM(html)
+  const doc = dom.window.document
+
+  const balanceText = doc.querySelector('[data-testid="member__balance"]')?.textContent?.trim() ?? ""
+  const balance = balanceText.replace(/[^0-9.]/g, "") || null
+
+  const daysText = doc.querySelector('[data-testid="member__days-past-due"]')?.textContent?.trim() ?? ""
+  const daysMatch = daysText.match(/(\d+)/)
+  const daysPastDue = daysMatch ? parseInt(daysMatch[1]!, 10) : null
+
+  const lastText = doc.querySelector('[data-testid="member__last-payment"]')?.textContent?.trim() ?? ""
+  const amtMatch = lastText.match(/\$([\d.]+)/)
+  const lastPaymentAmount = amtMatch ? amtMatch[1]! : null
+  const dateMatch = lastText.match(/on\s+([A-Z][a-z]{2}\s+\d{1,2},?\s+\d{4})/)
+  const lastPaymentDate = dateMatch ? parseDate(dateMatch[1]!) : null
+
+  return { balance, daysPastDue, lastPaymentAmount, lastPaymentDate }
+}

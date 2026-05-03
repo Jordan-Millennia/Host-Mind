@@ -2,9 +2,15 @@ import { describe, it, expect } from "vitest"
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { parseListingPage } from "../../src/padsplit/parsers"
+import { parseMemberProfile } from "../../src/padsplit/parsers"
 
 const fixture = readFileSync(
   resolve(__dirname, "../fixtures/padsplit-listing-detail.html"),
+  "utf-8",
+)
+
+const memberFixture = readFileSync(
+  resolve(__dirname, "../fixtures/padsplit-member-profile.html"),
   "utf-8",
 )
 
@@ -43,5 +49,22 @@ describe("parseListingPage", () => {
   it("normalizes 'Moving in' to MOVING_IN", () => {
     const r = parseListingPage(fixture).rooms[2]!
     expect(r.status).toBe("MOVING_IN")
+  })
+})
+
+describe("parseMemberProfile", () => {
+  it("extracts balance, days past due, and last payment", () => {
+    const out = parseMemberProfile(memberFixture)
+    expect(out.balance).toBe("420.00")
+    expect(out.daysPastDue).toBe(5)
+    expect(out.lastPaymentAmount).toBe("165.00")
+    expect(out.lastPaymentDate).toBe("2026-04-22")
+  })
+
+  it("returns null fields when the profile shows no balance", () => {
+    const out = parseMemberProfile(`<div data-testid="member__balance">$0.00</div>`)
+    expect(out.balance).toBe("0.00")
+    expect(out.daysPastDue).toBeNull()
+    expect(out.lastPaymentDate).toBeNull()
   })
 })

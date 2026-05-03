@@ -33,6 +33,12 @@ async function main() {
         log.info(result, "occupancy complete")
         return
       }
+      if (job === "padsplit:financials") {
+        const { runFinancials } = await import("./padsplit/financials.js")
+        const result = await runFinancials()
+        log.info(result, "financials complete")
+        return
+      }
       log.error({ job }, "unknown job")
       process.exit(1)
     }

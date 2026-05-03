@@ -199,3 +199,48 @@ export async function upsertOccupancy(args: {
     })
   }
 }
+
+export async function updateOccupancyFinancials(args: {
+  occupancyId: string
+  balance: string | null
+  daysPastDue: number | null
+  lastPaymentAmount: string | null
+  lastPaymentAt: string | null
+}): Promise<void> {
+  await prisma.occupancy.update({
+    where: { id: args.occupancyId },
+    data: {
+      currentBalance: args.balance ?? null,
+      daysPastDue: args.daysPastDue,
+      lastPaymentAmount: args.lastPaymentAmount ?? null,
+      lastPaymentAt: args.lastPaymentAt ? new Date(args.lastPaymentAt) : null,
+      lastFinancialSyncAt: new Date(),
+    },
+  })
+}
+
+export async function recordPaymentEvent(args: {
+  orgId: string
+  memberId: string
+  occupancyId: string | null
+  amount: string
+  eventDate: string
+  externalEventId: string  // hash of (memberId, amount, eventDate, source)
+}): Promise<void> {
+  await prisma.paymentEvent.upsert({
+    where: {
+      memberId_externalEventId: { memberId: args.memberId, externalEventId: args.externalEventId },
+    },
+    create: {
+      orgId: args.orgId,
+      memberId: args.memberId,
+      occupancyId: args.occupancyId,
+      amount: args.amount,
+      eventType: "PAYMENT",
+      eventDate: new Date(args.eventDate),
+      source: "PADSPLIT_SCRAPE",
+      externalEventId: args.externalEventId,
+    },
+    update: {},
+  })
+}
