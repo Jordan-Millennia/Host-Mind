@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs_22", "nodePackages_latest.pnpm"]
+
+[phases.install]
+cmds = ["cd roomos && pnpm install --frozen-lockfile"]
+
+[phases.build]
+cmds = ["cd roomos && pnpm db:generate && pnpm --filter @roomos/web build"]
+
+[start]
+cmd = "cd roomos && pnpm db:migrate:deploy && pnpm --filter @roomos/web start"
