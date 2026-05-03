@@ -1,4 +1,4 @@
-import { auth as clerkAuth } from "@clerk/nextjs/server"
+import { auth as clerkAuth, clerkClient } from "@clerk/nextjs/server"
 import { prisma } from "@roomos/db"
 import type { Role } from "@roomos/db"
 
@@ -10,13 +10,34 @@ export type Ctx = {
   ownerId: string | null
 }
 
-/** Resolve the request's auth context. Returns null when not signed in
- *  OR when the team_user record hasn't been created yet (webhook lag). */
+/** Resolve the request's auth context. Returns null when not signed in.
+ *  Auto-provisions a team_user row on first access to handle webhook lag. */
 export async function resolveContext(): Promise<Ctx | null> {
   const { userId } = await clerkAuth()
   if (!userId) return null
 
-  const teamUser = await prisma.teamUser.findUnique({ where: { clerkUserId: userId } })
+  let teamUser = await prisma.teamUser.findUnique({ where: { clerkUserId: userId } })
+
+  // Lazy-provision: Clerk session exists but webhook hasn't created the row yet
+  if (!teamUser) {
+    const org = await prisma.org.findFirst({ where: { name: "CoHost Management" } })
+    if (org) {
+      let email = ""
+      try {
+        const client = await clerkClient()
+        const clerkUser = await client.users.getUser(userId)
+        email = clerkUser.emailAddresses?.[0]?.emailAddress ?? ""
+      } catch {
+        // non-fatal — email can be backfilled by webhook later
+      }
+      teamUser = await prisma.teamUser.upsert({
+        where: { clerkUserId: userId },
+        create: { orgId: org.id, clerkUserId: userId, email, role: "AGENT" },
+        update: {},
+      })
+    }
+  }
+
   if (!teamUser) return null
 
   return {
