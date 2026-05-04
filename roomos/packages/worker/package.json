@@ -7,6 +7,7 @@
     "roomos-worker": "./dist/cli.js"
   },
   "scripts": {
+    "start": "tsx src/cli.ts",
     "build": "tsc",
     "dev": "tsx src/cli.ts",
     "lint": "echo 'no lint'",
