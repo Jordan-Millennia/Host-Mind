@@ -71,16 +71,17 @@ model Org {
   name      String
   createdAt DateTime @default(now()) @map("created_at")
 
-  owners      Owner[]
-  properties  Property[]
-  rooms       Room[]
-  listings    PlatformListing[]
-  members     Member[]
-  occupancies Occupancy[]
-  payments    PaymentEvent[]
-  teamUsers   TeamUser[]
-  syncRuns    SyncRun[]
-  auditLogs   AuditLog[]
+  owners            Owner[]
+  properties        Property[]
+  rooms             Room[]
+  listings          PlatformListing[]
+  members           Member[]
+  occupancies       Occupancy[]
+  payments          PaymentEvent[]
+  teamUsers         TeamUser[]
+  syncRuns          SyncRun[]
+  auditLogs         AuditLog[]
+  workerHeartbeats  WorkerHeartbeat[]
 
   @@map("orgs")
 }
@@ -309,4 +310,17 @@ model AuditLog {
 
   @@index([orgId, createdAt])
   @@map("audit_log")
+}
+
+model WorkerHeartbeat {
+  id         String   @id @default(cuid())
+  orgId      String   @map("org_id")
+  workerId   String   @unique @map("worker_id")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+  meta       Json?
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@map("worker_heartbeats")
 }

@@ -4,6 +4,7 @@ import { processOccupancy } from "./jobs/padsplit-occupancy"
 import { processFinancials } from "./jobs/padsplit-financials"
 import { processInteractiveLogin } from "./jobs/padsplit-interactive-login"
 import { log } from "./log"
+import { postHeartbeat } from "./http"
 
 const REPEAT = {
   occupancy: { every: 30 * 60 * 1000 },
@@ -24,6 +25,10 @@ export async function startScheduler(): Promise<void> {
     "padsplit:financials": processFinancials,
     "padsplit:interactive_login": processInteractiveLogin,
   })
+
+  // Pulse every 60s; web pill goes red if silent for 5+ min
+  setInterval(() => { void postHeartbeat() }, 60_000)
+  void postHeartbeat()  // fire one immediately
 
   log.info("scheduler running — Ctrl+C to stop")
   await new Promise(() => {})  // run forever

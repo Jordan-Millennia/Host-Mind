@@ -11,6 +11,7 @@ export default defineConfig({
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_placeholder",
       CLERK_SECRET_KEY: "sk_test_placeholder",
       CLERK_WEBHOOK_SECRET: "whsec_placeholder_for_dev",
+      WORKER_API_KEY: "test_placeholder_worker_api_key_32chars_xx",
       NEXT_PUBLIC_APP_URL: "http://localhost:3000",
     },
   },
