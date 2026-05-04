@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { UserButton } from "@clerk/nextjs"
 import { BrandStack } from "./BrandStack"
+import { SyncPill } from "./SyncPill"
 
 const NAV = [
   { href: "/rooms", label: "Rooms" },
@@ -10,7 +11,7 @@ const NAV = [
   { href: "/settings", label: "Settings" },
 ] as const
 
-export function Topbar({ activeHref }: { activeHref: string }) {
+export function Topbar({ activeHref, orgId }: { activeHref: string; orgId: string }) {
   return (
     <header className="border-b border-[color:var(--color-rule)] bg-[color:var(--color-paper)]">
       <div className="flex items-center justify-between px-7 py-4">
@@ -34,7 +35,10 @@ export function Topbar({ activeHref }: { activeHref: string }) {
             )
           })}
         </nav>
-        <UserButton appearance={{ variables: { colorPrimary: "#D4A843" } }} />
+        <div className="flex items-center gap-4">
+          <SyncPill orgId={orgId} />
+          <UserButton appearance={{ variables: { colorPrimary: "#D4A843" } }} />
+        </div>
       </div>
     </header>
   )
