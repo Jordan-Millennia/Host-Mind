@@ -5,7 +5,9 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
-  "/api/clerk-webhook", // signature-verified separately in Task 6
+  "/api/clerk-webhook",  // signature-verified separately in Task 6
+  "/api/heartbeat",      // verified by requireWorkerAuth (Bearer token)
+  "/api/screenshots",    // verified by requireWorkerAuth (Bearer token)
 ])
 
 export default clerkMiddleware(async (auth, req) => {

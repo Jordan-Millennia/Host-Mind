@@ -15,6 +15,17 @@ const REPEAT = {
 export async function startScheduler(): Promise<void> {
   log.info("starting bullmq scheduler")
 
+  // Clean up any pre-existing repeatable schedules so a changed `every` value
+  // (e.g., bumping occupancy from 30 to 15 min) doesn't leave the old schedule
+  // running alongside the new one. BullMQ keys repeatables by hash of name+opts.
+  const existing = await queue.getRepeatableJobs()
+  for (const r of existing) {
+    if (r.name.startsWith("padsplit:")) {
+      await queue.removeRepeatableByKey(r.key)
+      log.info({ name: r.name, key: r.key }, "removed pre-existing repeatable")
+    }
+  }
+
   await queue.add("padsplit:occupancy", {}, { repeat: REPEAT.occupancy, jobId: "repeat:occupancy" })
   await queue.add("padsplit:financials", {}, { repeat: REPEAT.financials, jobId: "repeat:financials" })
   await queue.add("padsplit:discovery", {}, { repeat: REPEAT.discovery, jobId: "repeat:discovery" })

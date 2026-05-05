@@ -3,7 +3,11 @@ import { writeFile, mkdir } from "node:fs/promises"
 import { resolve } from "node:path"
 import { requireWorkerAuth } from "@/lib/worker-auth"
 
+export const runtime = "nodejs"
+
 const UPLOAD_DIR = process.env.SCREENSHOT_UPLOAD_DIR ?? "/tmp/roomos-screenshots"
+const MAX_BYTES = 5 * 1024 * 1024  // 5 MB
+const ALLOWED_TYPES = new Set(["image/png", "image/jpeg", "image/webp"])
 
 export async function POST(req: Request) {
   try {
@@ -15,6 +19,10 @@ export async function POST(req: Request) {
   const form = await req.formData()
   const file = form.get("file")
   if (!(file instanceof File)) return NextResponse.json({ error: "missing file" }, { status: 400 })
+  if (file.size > MAX_BYTES) return NextResponse.json({ error: "file too large" }, { status: 413 })
+  if (file.type && !ALLOWED_TYPES.has(file.type)) {
+    return NextResponse.json({ error: "unsupported content type" }, { status: 415 })
+  }
   const name = (form.get("name") as string | null) ?? "screenshot.png"
 
   await mkdir(UPLOAD_DIR, { recursive: true })
