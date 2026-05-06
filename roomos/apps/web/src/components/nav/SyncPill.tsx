@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { getSyncStatus, type PillState } from "@/lib/sync-status"
 
 const COLORS: Record<PillState, { bg: string; fg: string; dot: string }> = {
@@ -12,13 +13,14 @@ export async function SyncPill({ orgId }: { orgId: string }) {
   const c = COLORS[s.state]
 
   return (
-    <span
-      className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.14em]"
+    <Link
+      href="/activity"
+      className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.14em] hover:opacity-80"
       style={{ background: c.bg, color: c.fg, border: `1px solid ${c.fg}40` }}
       title={s.message}
     >
       <span className="block w-1.5 h-1.5 rounded-full" style={{ background: c.dot }} />
       {s.message}
-    </span>
+    </Link>
   )
 }
