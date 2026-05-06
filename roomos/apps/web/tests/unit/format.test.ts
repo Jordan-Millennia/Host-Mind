@@ -11,6 +11,14 @@ describe("formatMoney", () => {
     expect(formatMoney(null)).toBe("—")
     expect(formatMoney(undefined)).toBe("—")
   })
+  it("handles Decimal-like objects (Prisma.Decimal valueOf coercion)", () => {
+    // Prisma's Decimal supports `Number(d)` via Symbol.toPrimitive / valueOf.
+    // We simulate one with valueOf returning a primitive number.
+    const decimalLike = { valueOf: () => 420, toString: () => "420.00" }
+    expect(formatMoney(decimalLike)).toBe("$420")
+    const decimalLike2 = { valueOf: () => 1234.56, toString: () => "1234.56" }
+    expect(formatMoney(decimalLike2)).toBe("$1,234.56")
+  })
 })
 
 describe("formatDate", () => {

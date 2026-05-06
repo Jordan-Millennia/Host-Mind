@@ -1,8 +1,10 @@
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as const
 
-export function formatMoney(amount: string | number | null | undefined): string {
+/** Accepts strings, numbers, and Decimal-like objects (Prisma.Decimal coerces
+ *  via valueOf when passed to Number()). Returns em-dash for nullish or NaN. */
+export function formatMoney(amount: unknown): string {
   if (amount === null || amount === undefined) return "—"
-  const n = typeof amount === "string" ? Number(amount) : amount
+  const n = typeof amount === "number" ? amount : Number(amount as never)
   if (!Number.isFinite(n)) return "—"
   const isWhole = n === Math.trunc(n)
   return isWhole

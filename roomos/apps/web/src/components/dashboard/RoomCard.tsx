@@ -47,10 +47,10 @@ export function RoomCard({ room, variant }: { room: RoomCardData; variant: "past
         <>
           <div className="flex items-center justify-between mt-3">
             <span className="italic text-[color:var(--color-muted)]">Empty</span>
-            <Pill kind="vacant">{room.vacantSinceDays != null ? `${room.vacantSinceDays} days` : "—"}</Pill>
+            <Pill kind="vacant">Vacant</Pill>
           </div>
           <div className="text-[11px] text-[color:var(--color-muted)] mt-1">
-            Last out: {formatDate(room.lastSyncedAt)}
+            Last sync: {formatDate(room.lastSyncedAt)}
           </div>
         </>
       )}
