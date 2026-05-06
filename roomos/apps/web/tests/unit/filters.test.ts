@@ -56,7 +56,9 @@ describe("buildWhereClause", () => {
   })
   it("free-text q matches address OR property name OR member name (case-insensitive)", () => {
     const where = buildWhereClause("org_x", { status: "all", ownerId: null, propertyId: null, q: "MARCUS", sort: "address", page: 1 })
-    expect(where.OR?.[0]?.property?.address?.contains).toBe("MARCUS")
-    expect(where.OR?.[0]?.property?.address?.mode).toBe("insensitive")
+    const orClause = where.OR as Array<Record<string, unknown>>
+    const first = orClause?.[0]?.property as Record<string, Record<string, unknown>> | undefined
+    expect(first?.address?.contains).toBe("MARCUS")
+    expect(first?.address?.mode).toBe("insensitive")
   })
 })
