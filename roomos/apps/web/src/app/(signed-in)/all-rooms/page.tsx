@@ -1,6 +1,7 @@
 import { requireSignedIn } from "@/lib/auth"
 import { parseSearchParams } from "@/lib/filters"
 import { getAllRoomsFiltered, getFilterOptions } from "@/lib/room-queries"
+import { ExportButton } from "@/components/all-rooms/ExportButton"
 import { FilterBar } from "@/components/all-rooms/FilterBar"
 import { RoomsTable } from "@/components/all-rooms/RoomsTable"
 import { PaginationLinks } from "@/components/all-rooms/PaginationLinks"
@@ -28,6 +29,7 @@ export default async function AllRoomsPage({ searchParams }: { searchParams: Sea
           </h1>
           <p className="mt-2 text-sm text-[color:var(--color-muted)]">{total} rooms matching current filters</p>
         </div>
+        <ExportButton />
       </div>
 
       <FilterBar owners={options.owners} properties={options.properties} />
