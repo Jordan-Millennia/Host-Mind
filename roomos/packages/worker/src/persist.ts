@@ -153,39 +153,26 @@ export async function upsertOccupancy(args: {
   moveInDate: string | null
   leaseEndDate: string | null
 }): Promise<void> {
-  // Find the most-recent active occupancy for this listing.
+  // Always maintain exactly one current-state row per listing.
+  // Find any existing row (regardless of status) and update it in place,
+  // or create one if none exists yet.
   const existing = await prisma.occupancy.findFirst({
-    where: {
-      orgId: args.orgId,
-      listingId: args.listingId,
-      status: { in: ["OCCUPIED", "MOVING_IN", "MOVING_OUT"] },
-    },
+    where: { orgId: args.orgId, listingId: args.listingId },
     orderBy: { createdAt: "desc" },
   })
 
-  // If the same member is still in the same listing, just update the status/dates.
-  if (existing && existing.memberId === args.memberId) {
+  if (existing) {
     await prisma.occupancy.update({
       where: { id: existing.id },
       data: {
+        memberId: args.memberId,
         status: args.status,
         moveInDate: args.moveInDate ? new Date(args.moveInDate) : null,
         leaseEndDate: args.leaseEndDate ? new Date(args.leaseEndDate) : null,
         scrapedAt: new Date(),
       },
     })
-    return
-  }
-
-  // Different member (or now vacant) — close the old, open the new.
-  if (existing) {
-    await prisma.occupancy.update({
-      where: { id: existing.id },
-      data: { status: "INACTIVE", scrapedAt: new Date() },
-    })
-  }
-
-  if (args.memberId || args.status !== "VACANT") {
+  } else {
     await prisma.occupancy.create({
       data: {
         orgId: args.orgId,
