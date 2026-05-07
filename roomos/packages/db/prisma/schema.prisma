@@ -82,6 +82,7 @@ model Org {
   syncRuns          SyncRun[]
   auditLogs         AuditLog[]
   workerHeartbeats  WorkerHeartbeat[]
+  teamInvitations   TeamInvitation[]
 
   @@map("orgs")
 }
@@ -323,4 +324,32 @@ model WorkerHeartbeat {
 
   @@index([orgId])
   @@map("worker_heartbeats")
+}
+
+// =====================================================================
+// Team invitations (Phase 1D)
+// =====================================================================
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+}
+
+model TeamInvitation {
+  id          String           @id @default(cuid())
+  orgId       String           @map("org_id")
+  token       String           @unique
+  email       String
+  role        Role             @default(AGENT)
+  status      InvitationStatus @default(PENDING)
+  invitedById String?          @map("invited_by_id")
+  acceptedAt  DateTime?        @map("accepted_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  expiresAt   DateTime         @map("expires_at")
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, status])
+  @@map("team_invitations")
 }
