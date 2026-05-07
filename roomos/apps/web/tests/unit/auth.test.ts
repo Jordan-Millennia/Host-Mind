@@ -6,7 +6,7 @@ const mockOrgFindFirst = vi.fn()
 const mockTeamUserFindUnique = vi.fn()
 const mockTeamUserUpsert = vi.fn()
 const mockInvitationFindFirst = vi.fn()
-const mockInvitationUpdate = vi.fn()
+const mockInvitationUpdateMany = vi.fn()
 
 vi.mock("@clerk/nextjs/server", () => ({
   auth: () => mockAuth(),
@@ -22,7 +22,7 @@ vi.mock("@roomos/db", () => ({
     },
     teamInvitation: {
       findFirst: (...a: unknown[]) => mockInvitationFindFirst(...a),
-      update: (...a: unknown[]) => mockInvitationUpdate(...a),
+      updateMany: (...a: unknown[]) => mockInvitationUpdateMany(...a),
     },
   },
 }))
@@ -37,7 +37,7 @@ describe("resolveContext", () => {
     mockTeamUserFindUnique.mockReset()
     mockTeamUserUpsert.mockReset()
     mockInvitationFindFirst.mockResolvedValue(null)
-    mockInvitationUpdate.mockResolvedValue({})
+    mockInvitationUpdateMany.mockResolvedValue({ count: 0 })
   })
 
   it("returns null when user is not signed in", async () => {
@@ -133,8 +133,8 @@ describe("resolveContext", () => {
     expect(mockTeamUserUpsert).toHaveBeenCalledWith(
       expect.objectContaining({ create: expect.objectContaining({ role: "ADMIN" }) }),
     )
-    expect(mockInvitationUpdate).toHaveBeenCalledWith({
-      where: { id: "inv_1" },
+    expect(mockInvitationUpdateMany).toHaveBeenCalledWith({
+      where: { id: "inv_1", status: "PENDING" },
       data: expect.objectContaining({ status: "ACCEPTED" }),
     })
     expect(ctx?.role).toBe("ADMIN")

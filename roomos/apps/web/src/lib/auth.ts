@@ -53,8 +53,11 @@ export async function resolveContext(): Promise<Ctx | null> {
         update: {},
       })
       if (invitationId) {
-        await prisma.teamInvitation.update({
-          where: { id: invitationId },
+        // updateMany with a status="PENDING" predicate is a CAS — if a second
+        // arriver hits the same invitation between our findFirst and update, the
+        // second update no-ops gracefully instead of overwriting acceptedAt.
+        await prisma.teamInvitation.updateMany({
+          where: { id: invitationId, status: "PENDING" },
           data: { status: "ACCEPTED", acceptedAt: new Date() },
         })
       }

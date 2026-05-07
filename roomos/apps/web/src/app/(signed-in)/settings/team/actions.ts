@@ -47,11 +47,14 @@ export async function createInvitation(formData: FormData): Promise<
   return { ok: true, inviteUrl }
 }
 
-/** Form-action: returns void. */
+/** Form-action: returns void. Org-scoped to prevent forged-id cross-org revoke. */
 export async function revokeInvitation(formData: FormData): Promise<void> {
-  await requireRole("ADMIN")
+  const ctx = await requireRole("ADMIN")
   const id = String(formData.get("id") ?? "")
   if (!id) return
-  await prisma.teamInvitation.update({ where: { id }, data: { status: "REVOKED" } })
+  await prisma.teamInvitation.updateMany({
+    where: { id, orgId: ctx.orgId, status: "PENDING" },
+    data: { status: "REVOKED" },
+  })
   revalidatePath("/settings/team")
 }

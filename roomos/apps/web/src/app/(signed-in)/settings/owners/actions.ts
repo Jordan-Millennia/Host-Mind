@@ -23,7 +23,8 @@ export async function deleteOwner(formData: FormData): Promise<void> {
   const props = await prisma.property.count({ where: { orgId: ctx.orgId, ownerId: id } })
   if (props > 0) return // client-side disabled button prevents reaching here
 
-  await prisma.owner.delete({ where: { id } })
+  // Org-scoped delete prevents a forged id from deleting another org's owner.
+  await prisma.owner.deleteMany({ where: { id, orgId: ctx.orgId } })
   revalidatePath("/settings/owners")
 }
 
