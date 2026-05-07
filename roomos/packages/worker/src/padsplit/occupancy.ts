@@ -80,8 +80,10 @@ export async function runOccupancy(): Promise<{ propertiesScraped: number; rooms
             const allText = card.textContent ?? ""
             const idMatch = allText.match(/\(Room\s+(\d+)\)/i)
             const externalRoomId = idMatch ? idMatch[1]! : ""
+            // Status text is concatenated directly with "ID: N" in the DOM (no space),
+            // so trailing \b would fail ("VacantID" has no boundary after "t").
             const statusMatch = allText.match(
-              /\b(Occupied|Vacant|Moving in|Moving out|Needs flip|Waiting for approval|Inactive)\b/i,
+              /\b(Occupied|Vacant|Moving in|Moving out|Needs flip|Waiting for approval|Inactive)/i,
             )
             const occStatus: string = STATUS_MAP[statusMatch ? statusMatch[1]!.toLowerCase() : ""] ?? "INACTIVE"
             const memberLink = card.querySelector('a[href*="/host/member/"]')
