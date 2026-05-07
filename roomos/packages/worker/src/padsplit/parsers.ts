@@ -65,7 +65,8 @@ export function parseListingPage(html: string): ParsedListingPage {
   const rooms: ParsedRoomCard[] = cards.map((card) => {
     const allText = card.textContent ?? ""
 
-    const idMatch = allText.match(/ID:\s*(\d+)/)
+    // Room number is embedded in the card heading as "Color (Room N)"
+    const idMatch = allText.match(/\(Room\s+(\d+)\)/i)
     const externalRoomId = idMatch ? idMatch[1]! : ""
 
     const statusMatch = allText.match(
