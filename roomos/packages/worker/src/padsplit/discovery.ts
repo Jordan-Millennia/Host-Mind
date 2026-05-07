@@ -27,12 +27,15 @@ async function scrapeRoomsList(): Promise<{ properties: DiscoveredProperty[]; ro
             const m = href.match(/\/host\/listing\/(\d+)/)
             const externalPropertyId = m ? m[1]! : ""
             const address = (a.textContent ?? "").trim()
-            // Walk up to the row to find the rendered "ID: <num>"
+            // Walk up to the TR row element
             let row: Element | null = a
-            for (let i = 0; i < 6 && row; i++) row = row.parentElement
-            const rowText = row?.textContent ?? ""
-            const idMatch = rowText.match(/ID:\s*(\d+)/)
-            const externalRoomId = idMatch ? idMatch[1]! : ""
+            for (let i = 0; i < 8 && row; i++) {
+              if (row.tagName === "TR") break
+              row = row.parentElement
+            }
+            // Room # is in the 2nd cell (index 1): columns are Address | Room # | Status | ...
+            const cells = row && row.tagName === "TR" ? row.querySelectorAll("td") : []
+            const externalRoomId = cells.length > 1 ? (cells[1]?.textContent ?? "").trim() : ""
             return { externalPropertyId, externalRoomId, address }
           }),
       )
