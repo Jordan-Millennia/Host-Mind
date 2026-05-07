@@ -30,11 +30,34 @@ export async function resolveContext(): Promise<Ctx | null> {
       } catch {
         // non-fatal — email can be backfilled by webhook later
       }
+      let role: "AGENT" | "ADMIN" = "AGENT"
+      let invitationId: string | null = null
+      if (email) {
+        const invitation = await prisma.teamInvitation.findFirst({
+          where: {
+            orgId: org.id,
+            email: email.toLowerCase(),
+            status: "PENDING",
+            expiresAt: { gt: new Date() },
+          },
+          orderBy: { createdAt: "desc" },
+        })
+        if (invitation) {
+          role = invitation.role === "ADMIN" ? "ADMIN" : "AGENT"
+          invitationId = invitation.id
+        }
+      }
       teamUser = await prisma.teamUser.upsert({
         where: { clerkUserId: userId },
-        create: { orgId: org.id, clerkUserId: userId, email, role: "AGENT" },
+        create: { orgId: org.id, clerkUserId: userId, email, role },
         update: {},
       })
+      if (invitationId) {
+        await prisma.teamInvitation.update({
+          where: { id: invitationId },
+          data: { status: "ACCEPTED", acceptedAt: new Date() },
+        })
+      }
     }
   }
 

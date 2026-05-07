@@ -5,6 +5,8 @@ const mockGetUser = vi.fn()
 const mockOrgFindFirst = vi.fn()
 const mockTeamUserFindUnique = vi.fn()
 const mockTeamUserUpsert = vi.fn()
+const mockInvitationFindFirst = vi.fn()
+const mockInvitationUpdate = vi.fn()
 
 vi.mock("@clerk/nextjs/server", () => ({
   auth: () => mockAuth(),
@@ -18,6 +20,10 @@ vi.mock("@roomos/db", () => ({
       findUnique: (...a: unknown[]) => mockTeamUserFindUnique(...a),
       upsert: (...a: unknown[]) => mockTeamUserUpsert(...a),
     },
+    teamInvitation: {
+      findFirst: (...a: unknown[]) => mockInvitationFindFirst(...a),
+      update: (...a: unknown[]) => mockInvitationUpdate(...a),
+    },
   },
 }))
 
@@ -30,6 +36,8 @@ describe("resolveContext", () => {
     mockOrgFindFirst.mockResolvedValue({ id: "org_x" })
     mockTeamUserFindUnique.mockReset()
     mockTeamUserUpsert.mockReset()
+    mockInvitationFindFirst.mockResolvedValue(null)
+    mockInvitationUpdate.mockResolvedValue({})
   })
 
   it("returns null when user is not signed in", async () => {
@@ -96,6 +104,40 @@ describe("resolveContext", () => {
     const ctx = await resolveContext()
     expect(ctx).toBeNull()
     expect(mockTeamUserUpsert).not.toHaveBeenCalled()
+  })
+
+  it("applies invitation role + marks invitation accepted on lazy-provision", async () => {
+    mockAuth.mockResolvedValue({ userId: "user_invited" })
+    mockTeamUserFindUnique.mockResolvedValue(null)
+    mockGetUser.mockResolvedValue({
+      emailAddresses: [{ emailAddress: "new@cohostmgmt.net" }],
+    })
+    mockInvitationFindFirst.mockResolvedValue({
+      id: "inv_1",
+      orgId: "org_x",
+      email: "new@cohostmgmt.net",
+      role: "ADMIN",
+      status: "PENDING",
+    })
+    mockTeamUserUpsert.mockResolvedValue({
+      id: "tu_x",
+      orgId: "org_x",
+      clerkUserId: "user_invited",
+      email: "new@cohostmgmt.net",
+      role: "ADMIN",
+      ownerId: null,
+    })
+
+    const ctx = await resolveContext()
+
+    expect(mockTeamUserUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ create: expect.objectContaining({ role: "ADMIN" }) }),
+    )
+    expect(mockInvitationUpdate).toHaveBeenCalledWith({
+      where: { id: "inv_1" },
+      data: expect.objectContaining({ status: "ACCEPTED" }),
+    })
+    expect(ctx?.role).toBe("ADMIN")
   })
 
   it("returns the resolved context for an existing signed-in agent (no upsert)", async () => {
