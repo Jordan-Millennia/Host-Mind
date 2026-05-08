@@ -21,6 +21,7 @@ From the deploy environment with `DATABASE_URL` pointing at the production Railw
 cd roomos
 pnpm install
 pnpm --filter @roomos/db exec prisma migrate deploy
+pnpm db:generate
 ```
 
 Confirm with:
