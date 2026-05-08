@@ -13,11 +13,26 @@ mv ~/Library/LaunchAgents/com.cohostmgmt.roomos.worker.plist \
 
 Confirm with `launchctl list | grep cohostmgmt` — should be empty.
 
-## 2. Install the new vault-sync agent
+## 2. Apply the Phase 2A database migration
+
+From the deploy environment with `DATABASE_URL` pointing at the production Railway Postgres:
+
+```bash
+cd roomos
+pnpm install
+pnpm --filter @roomos/db exec prisma migrate deploy
+```
+
+Confirm with:
+```bash
+psql "$DATABASE_URL" -c '\dt property_flags' -c '\d property_flags'
+```
+
+## 3. Install the new vault-sync agent
 
 (Filled in by Task 18 of the implementation plan.)
 
-## 3. Set the VAULT_PATH env var
+## 4. Set the VAULT_PATH env var
 
 In `roomos/packages/worker/.env.local`:
 
@@ -25,6 +40,6 @@ In `roomos/packages/worker/.env.local`:
 VAULT_PATH=/Users/jordanruvalcaba/Documents/CoHost-Knowledge-Hub
 ```
 
-## 4. Smoke test
+## 5. Smoke test
 
 (Filled in by Task 26.)
