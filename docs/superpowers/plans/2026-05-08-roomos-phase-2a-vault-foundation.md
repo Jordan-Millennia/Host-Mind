@@ -23,11 +23,11 @@
 
 ## What this plan does NOT cover (deferred)
 
-- **Hospitable adapter** (Airbnb side) → Phase 2B.
+- **Airbnb adapter** (Playwright against `airbnb.com/hosting`, no Hospitable) → Phase 2B.
 - **REI Hub adapter** (long-term lease side) → Phase 2C.
 - **Owner statement generator + GHL push** → Phase 2D.
 - **A vault writer** (RoomOS-side edits flowing back to vault `.md` files) → Phase 3.
-- **Cross-listing radar UI** beyond the data model — needs Hospitable to be wired in, so Phase 2B.
+- **Cross-listing radar UI** beyond the data model — needs the Airbnb adapter wired in, so Phase 2B.
 - **Owner mapping UI changes** — Settings → Owners (Phase 1D) is unchanged.
 
 ## Decisions locked
@@ -237,7 +237,7 @@ enum FlagSeverity {
 
 enum FlagSource {
   VAULT_SYNC
-  HOSPITABLE
+  AIRBNB
   REI_HUB
   MANUAL
 }
@@ -3182,7 +3182,7 @@ export function PropertyDetailRail({ p }: { p: PropertyDetail }) {
 
       <RailCard label="Sync history">
         <DetailRow k="Vault" v={p.lastVaultSyncAt ? relativeTime(p.lastVaultSyncAt) : "never"} />
-        <DetailRow k="Hospitable" v="N/A (Phase 2B)" />
+        <DetailRow k="Airbnb" v="N/A (Phase 2B)" />
         <DetailRow k="REI Hub" v="N/A (Phase 2C)" />
       </RailCard>
     </aside>
@@ -3452,4 +3452,4 @@ git commit -m "docs(2a): finalize deployment doc with smoke test steps"
 
 ---
 
-**Next:** plans for Phase 2B (Hospitable + cross-listing), 2C (REI Hub + long-term lease), 2D (owner statements + GHL push) get their own files in `docs/superpowers/plans/` after 2A ships and the smoke tests pass.
+**Next:** plans for Phase 2B (Airbnb direct adapter + cross-listing radar), 2C (REI Hub + long-term lease), 2D (owner statements + GHL push) get their own files in `docs/superpowers/plans/` after 2A ships and the smoke tests pass.

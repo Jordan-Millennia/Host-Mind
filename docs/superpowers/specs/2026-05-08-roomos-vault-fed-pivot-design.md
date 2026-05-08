@@ -14,12 +14,12 @@ RoomOS Phase 1 shipped a Next.js + Postgres + Clerk + Mac Studio architecture. T
 Meanwhile, two other systems have been quietly producing reliable, current operational data without anyone designing them as data sources:
 
 - **Codex `padsplit-message-responder`** runs the PadSplit + Airbnb inboxes and writes everything it learns back to the **CoHost Knowledge Hub vault** (`~/Documents/CoHost-Knowledge-Hub/`). 59 property files + 361 member dossiers, with structured frontmatter and tables, are kept current as a side effect of inbox handling. Snapshot folders prove the vault is being maintained at least daily.
-- **`daily-income-dashboard` skill** scrapes PadSplit + Hospitable + REI Hub and produces a daily HTML income report.
+- **`daily-income-dashboard` skill** scrapes PadSplit + Hospitable + REI Hub and produces a daily HTML income report. (Note: that skill's Hospitable scrape is for unrelated whole-house short-term rentals, not the room-rental side; this dashboard does not consume it.)
 
 So the strategic move is not to fix the broken duplicate scraper — it's to **retire it and feed RoomOS from the systems already producing the truth**. Three input adapters replace one scraper:
 
 - **Vault adapter** → PadSplit occupancy, members, flags, interaction logs (from the vault)
-- **Hospitable adapter** → Airbnb bookings, financials, calendar
+- **Airbnb adapter** → bookings, financials, calendar scraped directly from `airbnb.com/hosting` (Hospitable is not used for the room-rental side)
 - **REI Hub adapter** → long-term lease (TurboTenant-style) financials and per-property revenue
 
 The Postgres schema, dashboard, and owner-portal-ready RBAC stay intact.
@@ -56,7 +56,7 @@ The Postgres schema, dashboard, and owner-portal-ready RBAC stay intact.
   ├── daily-income-dashboard              ──writes──▶  CoSpace_Income_Dashboard.html (daily)
   └── RoomOS Worker (Node 20, launchd)
         ├── Vault adapter         (every 15 min)   ──TLS──▶ Railway Postgres
-        ├── Hospitable adapter    (every 30 min)   ──TLS──▶ Railway Postgres
+        ├── Airbnb adapter        (every 30 min)   ──TLS──▶ Railway Postgres
         ├── REI Hub adapter       (every 2 h)      ──TLS──▶ Railway Postgres
         └── Heartbeat             (every 60 s)     ──HTTPS─▶ Railway /api/heartbeat
 
@@ -69,12 +69,12 @@ The Postgres schema, dashboard, and owner-portal-ready RBAC stay intact.
         └── ghl_owner_sync                 (daily, 7am ET)
 
 [ External services ]
-  CoHost vault (local FS)  ·  Hospitable  ·  REI Hub  ·  GHL  ·  Google Drive
+  CoHost vault (local FS)  ·  airbnb.com/hosting  ·  REI Hub  ·  GHL  ·  Google Drive
 ```
 
 **Why this shape**
 
-- Mac Studio still runs the worker because the vault is local and Hospitable / REI Hub adapters benefit from the same residential IP + interactive Chrome that the message-responder already uses for non-API scraping.
+- Mac Studio still runs the worker because the vault is local and the Airbnb / REI Hub adapters benefit from the same residential IP + interactive Chrome that the message-responder already uses for `airbnb.com/hosting/inbox` today.
 - Worker is outbound-only (Redis, Postgres, heartbeat). No inbound, no port-forwarding.
 - Web stays up independent of the Mac. If the worker silences, the dashboard surfaces a "Sync stale" pill on the existing top bar (already implemented Phase 1).
 - Redis remains the buffer for transient outages.
@@ -111,22 +111,23 @@ The Postgres schema, dashboard, and owner-portal-ready RBAC stay intact.
 
 **Conflict resolution:** vault is authoritative. If a RoomOS UI edit ever conflicts with the vault, the vault overwrites RoomOS state on the next sync. UI-side edits are disabled for vault-sourced fields in this phase; the UI is a read renderer.
 
-### 4.2 Hospitable adapter
+### 4.2 Airbnb adapter
 
-**Reads** (preferred: Hospitable API; fallback: scraping the dashboard the way `daily-income-dashboard` already does):
+**Reads** (Playwright against `airbnb.com/hosting`, same residential-IP pattern the message-responder already uses for the Airbnb inbox):
 
-- Per-property booking calendar (room/unit-keyed if Hospitable separates rooms; otherwise property-level for whole-house Airbnb).
-- Net revenue, average nightly rate, occupancy %, reservations, cancellations, length of stay.
+- `/hosting/listings` → every Airbnb listing on Jordan's host account (per-room listings, whole-house listings, both).
+- `/hosting/calendar/<listing-id>` → upcoming + current bookings per listing.
+- `/hosting/transactions` → completed payouts and per-reservation revenue.
 
 **Writes:**
 
-- Upserts an `AIRBNB` row in `platform_listings` for each Hospitable-tracked unit.
+- Upserts an `AIRBNB` row in `platform_listings` for each Airbnb listing. Mapping back to a RoomOS `Room` is by address match against `properties.address` + listing-title parsing (e.g. "Room 1 — 1311 Morgana"). Ambiguous matches write the row attached to the property's first unmapped room and raise a `WARN` flag for Jordan to confirm in a Settings → Airbnb Mapping page (built in Phase 2B).
 - Upserts `occupancies` for active bookings: `OCCUPIED` for the current stay; `MOVING_IN` / `MOVING_OUT` for the 24 h windows around check-in/out.
-- Inserts `payment_events` from Hospitable's net-revenue line items, keyed by Hospitable transaction ID for idempotency.
+- Inserts `payment_events` from `/hosting/transactions`, keyed by Airbnb confirmation code for idempotency.
 
 **Cadence:** every 30 minutes.
 
-**Open question:** Jordan's Hospitable API access is unconfirmed. If unavailable, this adapter reuses the same JS-extraction pattern that `daily-income-dashboard` already uses, just running more frequently and writing to Postgres instead of an HTML file.
+**Open question:** Airbnb's listing model doesn't carry a stable per-room identifier the way PadSplit does, so the adapter has to infer the room from listing title + property address. Phase 2B's first deliverable surfaces inferred matches in a confirmation UI; until Jordan confirms, those rows stay in `platform_listings` flagged.
 
 ### 4.3 REI Hub adapter
 
@@ -150,8 +151,8 @@ The Postgres schema, dashboard, and owner-portal-ready RBAC stay intact.
 The Phase 1 schema mostly stays. Additions:
 
 - `platform_listings.platform` enum gains `LONG_TERM_LEASE` (REI Hub).
-- New table **`property_flags`**: `id, org_id, property_id, room_id (nullable), severity (DANGER|WARN|INFO|OK), title, body, source (VAULT_SYNC|HOSPITABLE|REI_HUB|MANUAL), opened_at, closed_at, source_ref`.
-- `sync_runs.kind` enum gains `VAULT_SYNC`, `HOSPITABLE_SYNC`, `REI_HUB_SYNC` (replaces `DISCOVERY` / `OCCUPANCY` / `FINANCIAL`).
+- New table **`property_flags`**: `id, org_id, property_id, room_id (nullable), severity (DANGER|WARN|INFO|OK), title, body, source (VAULT_SYNC|AIRBNB|REI_HUB|MANUAL), opened_at, closed_at, source_ref`.
+- `sync_runs.kind` enum gains `VAULT_SYNC`, `AIRBNB_SYNC`, `REI_HUB_SYNC` (replaces `DISCOVERY` / `OCCUPANCY` / `FINANCIAL`).
 - `members` gets `member_dossier_path` — the vault file path, for cross-linking from the UI.
 - `properties` gets `vault_file_path` — same purpose.
 - New `WAITING_APPROVAL` value already exists in the Phase 1 `occupancies.status` enum; we use it for booking applicants surfaced from vault flags.
@@ -225,7 +226,7 @@ Sequenced so each step is independently shippable.
 2. **Build the vault adapter** as a new worker job. Run it on the Mac Studio (vault is local; output goes to Railway Postgres over TLS). Same launchd pattern as the existing scraper but a different input.
 3. **Refresh the Phase 1 dashboard styling** to match the locked design language (mockups in `.superpowers/brainstorm/`). This is a CSS-and-typography pass over the existing components — no backend changes.
 4. **Add `property_flags` table + migration**, surface the right-rail flags list in the property detail view.
-5. **Light up Hospitable adapter** (Airbnb-only properties first; whole-house). Surface the cross-listing radar on the Properties list when a `room_id` has both `PADSPLIT` and `AIRBNB` rows in `platform_listings` with `is_active = true`.
+5. **Light up Airbnb adapter** (scraping `airbnb.com/hosting` directly). Build the Settings → Airbnb Mapping page so Jordan can confirm inferred listing → room mappings. Surface the cross-listing radar on the Properties list when a `room_id` has both `PADSPLIT` and `AIRBNB` rows in `platform_listings` with `is_active = true`.
 6. **Light up REI Hub adapter.** Long-term-lease properties join the rent roll.
 7. **Owner statement generator** as a monthly cron. PDF + XLSX + Drive drop.
 8. **GHL push** as the daily + monthly cron.
@@ -234,7 +235,7 @@ Sequenced so each step is independently shippable.
 
 ## 9. Open questions
 
-1. **Hospitable API access.** Does Jordan have it? If yes, that's the path. If no, reuse the JS-extraction pattern from `daily-income-dashboard` and accept the lower fidelity (no per-room mapping for Airbnb).
+1. **Airbnb listing → room mapping.** Airbnb's per-listing data doesn't carry a stable PadSplit-style room ID, so the adapter infers from listing title + property address. The first version writes inferred matches and flags them for confirmation; Jordan reviews them in the Airbnb Mapping settings page (Phase 2B).
 2. **REI Hub transaction IDs.** REI Hub doesn't expose a stable per-row ID in the visible DOM. We'll need to either inspect a row's React props (the same trick used by the message-responder for emails) or generate a dedup hash from `(date, property, type, amount, description)` — fragile if any field is normalized differently between scrapes. Ship hash-based dedup first, monitor for duplicates, switch to React-extracted IDs if needed.
 3. **Vault member-name collisions.** Same name on two properties (very rare but possible) breaks the fallback key. Mitigation: vault adapter logs a `WARN` flag for duplicates, defers writing the conflicting occupancies until Jordan resolves manually.
 4. **Read-only-or-not for vault-sourced UI.** This phase locks vault fields as read-only in RoomOS. If team feedback is "we want to edit a member's name in the dashboard," Phase 3 adds a vault writer (markdown round-trip is non-trivial).
@@ -249,7 +250,7 @@ This pivot ships when:
 - Mac Studio PadSplit scraper is retired; no Sentry errors are coming from it.
 - Properties list page renders all 59 active properties with current occupancy donuts and an owner column. Sync pill shows < 15 min stale during business hours.
 - Property detail page renders correct member assignments, balances, and live flags for at least three spot-checked properties (1311 Morgana, 8041 Osceola, 218 San Marco).
-- Hospitable adapter pulls at least one Airbnb-only property into the same dashboard (e.g., 7728 Linkside Loop).
+- Airbnb adapter pulls at least one Airbnb-only property into the same dashboard (e.g., 7728 Linkside Loop) and at least one cross-listed room (PadSplit + Airbnb on the same `room_id`) for the cross-listing radar test.
 - REI Hub adapter pulls at least one long-term-lease property into the same dashboard.
 - An owner statement generates without error for one CoHost-managed owner; the PDF + XLSX land in Drive and the GHL custom fields update on that owner's contact.
 - Cross-listing radar fires (correctly, per the rule above) on at least one test case.
@@ -260,7 +261,8 @@ This pivot ships when:
 
 - `2026-05-02-roomos-phase-1-design.md` — original RoomOS spec; preserved schema and dashboard architecture.
 - `~/.codex/skills/padsplit-message-responder/SKILL.md` — primary writer to the vault.
-- `~/Documents/Claude/Scheduled/daily-income-dashboard/SKILL.md` — pattern reference for Hospitable + REI Hub scraping.
+- `~/Documents/Claude/Scheduled/daily-income-dashboard/SKILL.md` — pattern reference for REI Hub scraping. (Its Hospitable scrape is for a separate whole-house line and is not consumed here.)
+- `~/.codex/skills/padsplit-message-responder/SKILL.md` — already opens `airbnb.com/hosting/inbox` interactively; the same Playwright session shape is the model for the Phase 2B Airbnb adapter.
 - `~/Documents/CoHost-Knowledge-Hub/` — vault root; primary input.
 - `.superpowers/brainstorm/62120-1778263597/content/properties-list-v2.html` — Properties list mockup, locked.
 - `.superpowers/brainstorm/62120-1778263597/content/property-detail.html` — Property detail mockup, locked.
