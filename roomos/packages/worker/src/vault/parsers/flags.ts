@@ -30,6 +30,6 @@ function inferSeverity(text: string): VaultFlagSeverity {
 }
 
 function stripLeadingEmoji(text: string): string {
-  // Strip a single emoji + optional space at the start.
-  return text.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]\s*/u, "")
+  // Strip a single emoji (with optional Variation Selector-16) + optional space at the start.
+  return text.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]️?\s*/u, "")
 }

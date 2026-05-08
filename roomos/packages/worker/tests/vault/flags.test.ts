@@ -40,4 +40,14 @@ describe("parseFlags", () => {
   it("returns empty array if there's no Flags & Alerts section", () => {
     expect(parseFlags("# nothing here")).toEqual([])
   })
+
+  it("does not leave a Variation Selector-16 orphan in titles after stripping ⚠️ or ✅", () => {
+    const flags = parseFlags(FIXTURE)
+    for (const f of flags) {
+      // Title must not start with U+FE0F (the dangling variation selector)
+      expect(f.title.codePointAt(0)).not.toBe(0xfe0f)
+      // Body must not start with U+FE0F either (when title is empty)
+      expect(f.body.codePointAt(0) ?? 0).not.toBe(0xfe0f)
+    }
+  })
 })
