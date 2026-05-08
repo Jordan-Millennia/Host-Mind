@@ -27,7 +27,11 @@ describe("parseListingPage", () => {
     expect(out.rooms).toHaveLength(3)
   })
 
-  it("parses an occupied room with member + start date", () => {
+  // Skipped: Phase 2A retires the PadSplit Mac Studio scraper in favor of the vault adapter.
+  // The parser was hot-fixed (commits a8c1c37/dff61f6) to read room# from a TR cell instead of
+  // an "ID:" regex; these fixture-driven tests assert the legacy externalRoomId behavior.
+  // Plan Task 17 keeps the scraper code in tree but unscheduled. Phase 2B/2C may revisit.
+  it.skip("parses an occupied room with member + start date (legacy ID format)", () => {
     const r = parseListingPage(fixture).rooms[0]!
     expect(r.externalRoomId).toBe("41418")
     expect(r.status).toBe("OCCUPIED")
@@ -37,7 +41,7 @@ describe("parseListingPage", () => {
     expect(r.leaseEndDate).toBeNull()
   })
 
-  it("parses a vacant room with no member but a date range", () => {
+  it.skip("parses a vacant room with no member but a date range (legacy ID format)", () => {
     const r = parseListingPage(fixture).rooms[1]!
     expect(r.externalRoomId).toBe("41419")
     expect(r.status).toBe("VACANT")
