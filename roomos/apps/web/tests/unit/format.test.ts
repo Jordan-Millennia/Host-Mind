@@ -50,8 +50,8 @@ describe("donutSegments", () => {
     const seg = donutSegments({ occupied: 4, vacant: 2 })
     const sum = seg.reduce((s, x) => s + x.length, 0)
     expect(sum).toBeCloseTo(2 * Math.PI * 14, 1)
-    expect(seg[0].color).toBe("occupied")
-    expect(seg[1].color).toBe("vacant")
+    expect(seg[0]?.color).toBe("occupied")
+    expect(seg[1]?.color).toBe("vacant")
   })
 
   it("places moving segment between occupied and vacant", () => {
