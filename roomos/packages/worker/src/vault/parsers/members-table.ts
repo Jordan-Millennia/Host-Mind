@@ -13,7 +13,7 @@ export function parseMembersTable(content: string): VaultMemberRow[] {
   // Find the "## Current Members" heading and capture content until the next ## heading or --- divider.
   const sectionMatch = content.match(/##\s+Current Members\s*\n([\s\S]*?)(?=\n##\s+|\n---|\n*$)/)
   if (!sectionMatch) return []
-  const tableLines = sectionMatch[1]
+  const tableLines = sectionMatch[1]!
     .split("\n")
     .map((l) => l.trim())
     .filter((l) => l.startsWith("|"))
@@ -27,7 +27,7 @@ export function parseMembersTable(content: string): VaultMemberRow[] {
     if (cells.length < 6) continue
     const [, roomNumber, name, statusRaw, balanceText, notes] = cells
     if (!roomNumber || !name) continue
-    const status = stripBold(statusRaw)
+    const status = stripBold(statusRaw ?? "")
     if (!STATUS_VALUES.includes(status as VaultMemberStatusText)) continue
     rows.push({
       roomNumber: roomNumber.toUpperCase(),
