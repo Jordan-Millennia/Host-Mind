@@ -17,8 +17,8 @@ export function CsvImportForm() {
   }
 
   return (
-    <div className="border border-[color:var(--color-rule)] rounded-md p-5 bg-[color:var(--color-paper)]">
-      <p className="text-sm text-[color:var(--color-muted)] mb-3">
+    <div className="border border-[color:var(--color-hairline)] rounded-md p-5 bg-[color:var(--color-paper)]">
+      <p className="text-sm text-[color:var(--color-ink-3)] mb-3">
         Upload a CSV with columns <code>address,owner_name,owner_email</code>. Owners are created if missing
         and matched by name+email. Properties are matched by exact address.
       </p>
@@ -55,7 +55,7 @@ export function CsvImportForm() {
             </details>
           )}
           {report.notFoundAddresses.length > 0 && (
-            <details className="mt-2 text-[color:var(--color-muted)]">
+            <details className="mt-2 text-[color:var(--color-ink-3)]">
               <summary className="cursor-pointer">{report.notFoundAddresses.length} addresses didn&apos;t match a property</summary>
               <ul className="mt-1 text-xs list-disc pl-5">
                 {report.notFoundAddresses.map((a, i) => <li key={i}>{a}</li>)}

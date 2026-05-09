@@ -9,20 +9,20 @@ const STRIPE: Record<string, string> = {
   MOVING_OUT: "var(--color-amber)",
   NEEDS_FLIP: "var(--color-amber)",
   WAITING_APPROVAL: "var(--color-amber)",
-  INACTIVE: "var(--color-muted)",
+  INACTIVE: "var(--color-ink-3)",
 }
 
 export function RoomCard({ room, variant }: { room: RoomCardData; variant: "past_due" | "vacant" | "moving" | "needs_flip" | "occupied" }) {
   return (
     <Link
       href={`/rooms/${room.roomId}`}
-      className="block relative p-5 bg-[color:var(--color-paper)] border border-[color:var(--color-rule)] rounded-md hover:border-[color:var(--color-rule-hi)] transition-colors"
+      className="block relative p-5 bg-[color:var(--color-paper)] border border-[color:var(--color-hairline)] rounded-md hover:border-[color:var(--color-hairline-hi)] transition-colors"
     >
-      <span className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ background: STRIPE[room.status] ?? "var(--color-muted)" }} />
+      <span className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ background: STRIPE[room.status] ?? "var(--color-ink-3)" }} />
       <div className="font-[family-name:var(--font-display)] text-base font-bold tracking-tight leading-tight">
         {room.propertyAddress}
       </div>
-      <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+      <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[color:var(--color-ink-3)]">
         Room {room.roomNumber ?? "—"} · {room.propertyCity ?? "—"}
       </div>
 
@@ -33,7 +33,7 @@ export function RoomCard({ room, variant }: { room: RoomCardData; variant: "past
             <Pill kind="due">{room.daysPastDue}d past due</Pill>
           </div>
           <div className="flex items-center justify-between mt-1">
-            <span className="text-[11px] text-[color:var(--color-muted)]">
+            <span className="text-[11px] text-[color:var(--color-ink-3)]">
               {room.memberMonthsTenure != null ? `Member ${room.memberMonthsTenure}mo` : "—"}
             </span>
             <span className="text-sm font-semibold tabular-nums text-[color:var(--color-clay)]">
@@ -46,10 +46,10 @@ export function RoomCard({ room, variant }: { room: RoomCardData; variant: "past
       {variant === "vacant" && (
         <>
           <div className="flex items-center justify-between mt-3">
-            <span className="italic text-[color:var(--color-muted)]">Empty</span>
+            <span className="italic text-[color:var(--color-ink-3)]">Empty</span>
             <Pill kind="vacant">Vacant</Pill>
           </div>
-          <div className="text-[11px] text-[color:var(--color-muted)] mt-1">
+          <div className="text-[11px] text-[color:var(--color-ink-3)] mt-1">
             Last sync: {formatDate(room.lastSyncedAt)}
           </div>
         </>
@@ -64,7 +64,7 @@ export function RoomCard({ room, variant }: { room: RoomCardData; variant: "past
             </span>
             <Pill kind="moving">{formatDate(room.status === "MOVING_IN" ? room.moveInDate : room.leaseEndDate)}</Pill>
           </div>
-          <div className="text-[11px] text-[color:var(--color-muted)] mt-1">
+          <div className="text-[11px] text-[color:var(--color-ink-3)] mt-1">
             {room.status === "MOVING_IN" ? "Arriving" : "Departing"}
           </div>
         </>
@@ -73,7 +73,7 @@ export function RoomCard({ room, variant }: { room: RoomCardData; variant: "past
       {variant === "needs_flip" && (
         <>
           <div className="flex items-center justify-between mt-3">
-            <span className="italic text-[color:var(--color-muted)]">Needs flip</span>
+            <span className="italic text-[color:var(--color-ink-3)]">Needs flip</span>
             <Pill kind="flip">Awaiting</Pill>
           </div>
         </>

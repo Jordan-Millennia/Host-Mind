@@ -8,7 +8,7 @@ const TABS = [
 
 export function SettingsTabs({ activeHref }: { activeHref: string }) {
   return (
-    <nav className="flex gap-7 border-b border-[color:var(--color-rule)] mb-7">
+    <nav className="flex gap-7 border-b border-[color:var(--color-hairline)] mb-7">
       {TABS.map((t) => {
         const active = activeHref.startsWith(t.href)
         return (
@@ -16,7 +16,7 @@ export function SettingsTabs({ activeHref }: { activeHref: string }) {
             key={t.href}
             href={t.href}
             className={`relative py-3 text-[10px] font-semibold uppercase tracking-[0.18em] ${
-              active ? "text-[color:var(--color-ink-2)]" : "text-[color:var(--color-muted)] hover:text-[color:var(--color-ink-2)]"
+              active ? "text-[color:var(--color-ink-2)]" : "text-[color:var(--color-ink-3)] hover:text-[color:var(--color-ink-2)]"
             }`}
           >
             {t.label}

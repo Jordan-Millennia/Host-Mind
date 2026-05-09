@@ -13,9 +13,9 @@ export default async function HomePage() {
           CoHost Management
         </p>
         <h1 className="font-[family-name:var(--font-display)] text-5xl font-bold mt-4">
-          Room<span className="italic text-[color:var(--color-muted)]">OS</span>
+          Room<span className="italic text-[color:var(--color-ink-3)]">OS</span>
         </h1>
-        <p className="text-base text-[color:var(--color-muted)] mt-4">
+        <p className="text-base text-[color:var(--color-ink-3)] mt-4">
           Internal operator tool. Sign in to continue.
         </p>
         <div className="mt-8 flex gap-3 justify-center">

@@ -71,7 +71,7 @@ export function ConnectPadsplitCard({
         )}
       </div>
       {message && (
-        <p className="text-xs text-[color:var(--color-muted)]">{message}</p>
+        <p className="text-xs text-[color:var(--color-ink-3)]">{message}</p>
       )}
     </div>
   )

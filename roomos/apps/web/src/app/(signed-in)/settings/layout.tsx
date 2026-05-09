@@ -14,9 +14,9 @@ export default async function SettingsLayout({ children }: { children: React.Rea
           Restricted
         </p>
         <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold mt-4">
-          Settings <span className="italic text-[color:var(--color-muted)]">— admin only.</span>
+          Settings <span className="italic text-[color:var(--color-ink-3)]">— admin only.</span>
         </h1>
-        <p className="text-sm text-[color:var(--color-muted)] mt-3">
+        <p className="text-sm text-[color:var(--color-ink-3)] mt-3">
           Ask an admin on your team to grant you the ADMIN role to access this page.
         </p>
       </main>
@@ -30,7 +30,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
     <main className="px-7 py-10 max-w-[1400px] mx-auto">
       <div className="pb-2 mb-2">
         <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight">
-          Settings <span className="italic text-[color:var(--color-muted)]">— configure RoomOS</span>
+          Settings <span className="italic text-[color:var(--color-ink-3)]">— configure RoomOS</span>
         </h1>
       </div>
       <SettingsTabs activeHref={path} />

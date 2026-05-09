@@ -44,7 +44,7 @@ export function FilterBar({ owners, properties }: { owners: Owner[]; properties:
           if (e.key === "Enter") update({ q: (e.target as HTMLInputElement).value || null })
         }}
         placeholder="Search address, member, room…"
-        className="flex-1 min-w-[220px] text-sm px-3 py-2 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)] focus:outline-none focus:border-[color:var(--color-rule-hi)]"
+        className="flex-1 min-w-[220px] text-sm px-3 py-2 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] focus:outline-none focus:border-[color:var(--color-hairline-hi)]"
       />
 
       <div className="flex gap-1 flex-wrap">
@@ -58,7 +58,7 @@ export function FilterBar({ owners, properties }: { owners: Owner[]; properties:
               className={`text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border transition-colors ${
                 active
                   ? "bg-[color:var(--color-ink-2)] text-[color:var(--color-paper)] border-[color:var(--color-ink-2)]"
-                  : "bg-[color:var(--color-paper)] text-[color:var(--color-muted)] border-[color:var(--color-rule)] hover:border-[color:var(--color-rule-hi)]"
+                  : "bg-[color:var(--color-paper)] text-[color:var(--color-ink-3)] border-[color:var(--color-hairline)] hover:border-[color:var(--color-hairline-hi)]"
               }`}
             >
               {c.label}
@@ -70,7 +70,7 @@ export function FilterBar({ owners, properties }: { owners: Owner[]; properties:
       <select
         value={ownerId}
         onChange={(e) => update({ ownerId: e.target.value || null })}
-        className="text-sm px-2 py-2 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)]"
+        className="text-sm px-2 py-2 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]"
       >
         <option value="">All Owners</option>
         {owners.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
@@ -79,13 +79,13 @@ export function FilterBar({ owners, properties }: { owners: Owner[]; properties:
       <select
         value={propertyId}
         onChange={(e) => update({ propertyId: e.target.value || null })}
-        className="text-sm px-2 py-2 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)] max-w-[260px]"
+        className="text-sm px-2 py-2 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] max-w-[260px]"
       >
         <option value="">All Properties</option>
         {properties.map((p) => <option key={p.id} value={p.id}>{p.address}</option>)}
       </select>
 
-      {pending && <span className="text-[11px] text-[color:var(--color-muted)]">…</span>}
+      {pending && <span className="text-[11px] text-[color:var(--color-ink-3)]">…</span>}
     </div>
   )
 }

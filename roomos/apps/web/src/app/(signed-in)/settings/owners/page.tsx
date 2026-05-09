@@ -28,7 +28,7 @@ export default async function OwnersPage() {
   return (
     <div className="flex flex-col gap-9">
       <section>
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)] mb-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-ink-3)] mb-3">
           Owners ({owners.length})
         </h2>
         <OwnersList owners={owners} />
@@ -37,13 +37,13 @@ export default async function OwnersPage() {
             name="name"
             placeholder="Owner name"
             required
-            className="text-sm px-3 py-2 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)] flex-1 min-w-[180px]"
+            className="text-sm px-3 py-2 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] flex-1 min-w-[180px]"
           />
           <input
             name="email"
             type="email"
             placeholder="Billing email (optional)"
-            className="text-sm px-3 py-2 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)] flex-1 min-w-[180px]"
+            className="text-sm px-3 py-2 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] flex-1 min-w-[180px]"
           />
           <button
             type="submit"
@@ -55,14 +55,14 @@ export default async function OwnersPage() {
       </section>
 
       <section>
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)] mb-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-ink-3)] mb-3">
           Unmapped properties ({unmapped.length})
         </h2>
         <UnmappedProperties properties={unmapped} owners={allOwners} />
       </section>
 
       <section>
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)] mb-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-ink-3)] mb-3">
           Bulk import (CSV)
         </h2>
         <CsvImportForm />
