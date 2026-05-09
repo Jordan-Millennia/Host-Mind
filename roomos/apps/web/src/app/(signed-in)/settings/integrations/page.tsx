@@ -17,6 +17,7 @@ export default async function IntegrationsPage() {
   const heartbeat = await prisma.workerHeartbeat.findFirst({
     orderBy: { lastSeenAt: "desc" },
   })
+  // eslint-disable-next-line react-compiler/react-compiler -- Date.now() is safe in async Server Components
   const workerOnline = !!heartbeat && Date.now() - heartbeat.lastSeenAt.getTime() < 5 * 60_000
 
   return (
