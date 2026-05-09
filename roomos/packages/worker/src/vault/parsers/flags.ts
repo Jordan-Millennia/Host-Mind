@@ -8,7 +8,7 @@ export function parseFlags(content: string): VaultFlag[] {
     const m = line.match(/^>\s+(.+)$/)
     if (!m) continue
     const text = m[1]!.trim()
-    if (!text) continu
+    if (!text) continue
     const severity = inferSeverity(text)
     const stripped = stripLeadingEmoji(text)
     const [titleRaw, ...bodyParts] = stripped.split(/\s—\s|\s-\s/)
