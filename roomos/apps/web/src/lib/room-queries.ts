@@ -147,7 +147,26 @@ function monthsBetween(from: Date, to: Date): number {
   return Math.max(0, Math.floor(ms / (30 * 24 * 60 * 60 * 1000)))
 }
 
-function toRoomCardData(r: any): RoomCardData {
+interface RoomRow {
+  id: string
+  roomNumber: string | null
+  property: { address: string; city: string | null; owner: { name: string | null } | null }
+  listings: Array<{
+    externalListingId: string | null
+    lastSyncedAt: Date | null
+    occupancies: Array<{
+      status: string
+      memberId: string | null
+      moveInDate: Date | null
+      leaseEndDate: Date | null
+      daysPastDue: number | null
+      currentBalance: number | null
+      member: { name: string } | null
+    }>
+  }>
+}
+
+function toRoomCardData(r: RoomRow): RoomCardData {
   const listing = r.listings[0]
   const occupancy = listing?.occupancies?.[0]
   const owner = r.property.owner
