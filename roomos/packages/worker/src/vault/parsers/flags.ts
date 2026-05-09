@@ -4,11 +4,11 @@ export function parseFlags(content: string): VaultFlag[] {
   const sectionMatch = content.match(/##\s+Flags & Alerts\s*\n([\s\S]*?)(?=\n##\s+|\n---|\n*$)/)
   if (!sectionMatch) return []
   const flags: VaultFlag[] = []
-  for (const line of sectionMatch[1].split("\n")) {
+  for (const line of sectionMatch[1]!.split("\n")) {
     const m = line.match(/^>\s+(.+)$/)
     if (!m) continue
-    const text = m[1].trim()
-    if (!text) continue
+    const text = m[1]!.trim()
+    if (!text) continu
     const severity = inferSeverity(text)
     const stripped = stripLeadingEmoji(text)
     const [titleRaw, ...bodyParts] = stripped.split(/\s—\s|\s-\s/)
