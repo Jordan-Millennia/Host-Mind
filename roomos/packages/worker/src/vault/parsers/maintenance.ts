@@ -5,7 +5,7 @@ export function parseMaintenance(content: string): VaultMaintenanceItem[] {
     /##\s+Open Maintenance Items\s*\n([\s\S]*?)(?=\n##\s+|\n---|\n*$)/,
   )
   if (!sectionMatch) return []
-  const lines = sectionMatch[1]
+  const lines = sectionMatch[1]!
     .split("\n")
     .map((l) => l.trim())
     .filter((l) => l.startsWith("|"))
@@ -19,8 +19,8 @@ export function parseMaintenance(content: string): VaultMaintenanceItem[] {
     if (!description) continue
     items.push({
       description,
-      status: status.replace(/\*\*/g, "").trim(),
-      priority,
+      status: (status ?? "").replace(/\*\*/g, "").trim(),
+      priority: priority ?? "",
       raw: line,
     })
   }
