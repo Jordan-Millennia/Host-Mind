@@ -12,7 +12,7 @@
     <string>@roomos/worker</string>
     <string>start</string>
     <string>--</string>
-    <string>vault</string>
+    <string>scheduler</string>
   </array>
 
   <key>WorkingDirectory</key>
