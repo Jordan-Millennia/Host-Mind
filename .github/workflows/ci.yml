@@ -24,7 +24,7 @@ jobs:
       CLERK_WEBHOOK_SECRET: whsec_dummy
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       REDIS_URL: redis://localhost:6379
-      WORKER_API_KEY: ci_worker_key
+      WORKER_API_KEY: ci_worker_key_for_integration_tests
       WEB_BASE_URL: http://localhost:3000
     defaults:
       run:
