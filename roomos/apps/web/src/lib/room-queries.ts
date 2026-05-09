@@ -160,7 +160,7 @@ interface RoomRow {
       moveInDate: Date | null
       leaseEndDate: Date | null
       daysPastDue: number | null
-      currentBalance: number | null
+      currentBalance: { toString(): string } | null
       member: { name: string } | null
     }>
   }>
@@ -170,7 +170,7 @@ function toRoomCardData(r: RoomRow): RoomCardData {
   const listing = r.listings[0]
   const occupancy = listing?.occupancies?.[0]
   const owner = r.property.owner
-  const status = occupancy?.status ?? "VACANT"
+  const status = (occupancy?.status ?? "VACANT") as RoomCardData["status"]
   const now = new Date()
 
   return {
