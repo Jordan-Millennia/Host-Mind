@@ -27,7 +27,7 @@ export function ActivityTimeline({ items }: { items: Item[] }) {
           <div key={i} className="flex gap-3 pb-3 last:pb-0 border-b last:border-b-0 border-[color:var(--color-rule)]">
             <span className={`block w-2 h-2 rounded-full mt-[6px] ${dotClass(it)}`} />
             <div className="flex-1 text-sm">
-              <div className="text-[color:var(--color-charcoal)]">{label(it)}</div>
+              <div className="text-[color:var(--color-ink-2)]">{label(it)}</div>
               <div className="text-[11px] text-[color:var(--color-muted)] mt-1">
                 {formatDate(it.date)} · {formatDaysAgo(it.date)}
               </div>

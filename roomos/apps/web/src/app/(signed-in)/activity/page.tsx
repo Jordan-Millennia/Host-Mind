@@ -3,10 +3,10 @@ import { getRecentSyncRuns } from "@/lib/room-queries"
 import { formatDate, formatDaysAgo } from "@/lib/format"
 
 const STATUS_COLOR: Record<string, string> = {
-  RUNNING: "var(--color-moving)",
-  SUCCESS: "var(--color-occupied)",
-  PARTIAL: "var(--color-flip)",
-  FAILED:  "var(--color-due)",
+  RUNNING: "var(--color-amber)",
+  SUCCESS: "var(--color-green)",
+  PARTIAL: "var(--color-amber)",
+  FAILED:  "var(--color-clay)",
 }
 
 export default async function ActivityPage() {

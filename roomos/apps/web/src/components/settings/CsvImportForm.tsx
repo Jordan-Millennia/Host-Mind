@@ -33,7 +33,7 @@ export function CsvImportForm() {
         <button
           type="submit"
           disabled={pending}
-          className="text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md bg-[color:var(--color-coral)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-coral-light)] disabled:opacity-50"
+          className="text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md bg-[color:var(--color-coral)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-coral-soft)] disabled:opacity-50"
         >
           {pending ? "Importing…" : "Import"}
         </button>

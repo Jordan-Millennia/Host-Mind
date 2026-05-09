@@ -18,7 +18,7 @@ export function OccupiedFooter({ count, total }: { count: number; total: number 
       </div>
       <Link
         href="/all-rooms?status=occupied"
-        className="text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--color-muted)] hover:text-[color:var(--color-charcoal)]"
+        className="text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--color-muted)] hover:text-[color:var(--color-ink-2)]"
       >
         Expand ↓
       </Link>

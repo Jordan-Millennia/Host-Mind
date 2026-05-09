@@ -7,9 +7,9 @@ export default async function HomePage() {
   if (userId) redirect("/rooms")
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[color:var(--color-cream)]">
+    <main className="min-h-screen flex items-center justify-center bg-[color:var(--color-paper)]">
       <div className="text-center max-w-md px-8">
-        <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-gold)] font-semibold">
+        <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-coral)] font-semibold">
           CoHost Management
         </p>
         <h1 className="font-[family-name:var(--font-display)] text-5xl font-bold mt-4">
@@ -21,7 +21,7 @@ export default async function HomePage() {
         <div className="mt-8 flex gap-3 justify-center">
           <Link
             href="/sign-in"
-            className="bg-[color:var(--color-gold)] text-[color:var(--color-ink)] px-6 py-3 rounded-md text-xs font-semibold uppercase tracking-[0.12em] hover:bg-[color:var(--color-gold-light)]"
+            className="bg-[color:var(--color-coral)] text-[color:var(--color-ink)] px-6 py-3 rounded-md text-xs font-semibold uppercase tracking-[0.12em] hover:bg-[color:var(--color-coral-soft)]"
           >
             Sign in
           </Link>

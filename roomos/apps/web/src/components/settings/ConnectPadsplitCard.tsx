@@ -48,7 +48,7 @@ export function ConnectPadsplitCard({
 
   const buttonClass =
     "text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md " +
-    "bg-[color:var(--color-coral)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-coral-light)] disabled:opacity-50 disabled:cursor-not-allowed"
+    "bg-[color:var(--color-coral)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-coral-soft)] disabled:opacity-50 disabled:cursor-not-allowed"
 
   if (!workerOnline) {
     return (

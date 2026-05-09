@@ -16,7 +16,7 @@ export function SettingsTabs({ activeHref }: { activeHref: string }) {
             key={t.href}
             href={t.href}
             className={`relative py-3 text-[10px] font-semibold uppercase tracking-[0.18em] ${
-              active ? "text-[color:var(--color-charcoal)]" : "text-[color:var(--color-muted)] hover:text-[color:var(--color-charcoal)]"
+              active ? "text-[color:var(--color-ink-2)]" : "text-[color:var(--color-muted)] hover:text-[color:var(--color-ink-2)]"
             }`}
           >
             {t.label}

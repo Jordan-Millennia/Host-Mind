@@ -25,8 +25,8 @@ export function RoomHeader({
           Room {roomNumber ?? "—"} <span className="italic text-[color:var(--color-muted)]">at</span> {address}
         </h1>
         <div className="mt-2 flex gap-4 text-xs text-[color:var(--color-muted)]">
-          <span><strong className="text-[color:var(--color-charcoal)]">Owner:</strong> {ownerName ?? "Unmapped"}</span>
-          <span><strong className="text-[color:var(--color-charcoal)]">Market:</strong> {market ?? "—"}</span>
+          <span><strong className="text-[color:var(--color-ink-2)]">Owner:</strong> {ownerName ?? "Unmapped"}</span>
+          <span><strong className="text-[color:var(--color-ink-2)]">Market:</strong> {market ?? "—"}</span>
           {externalRoomId && <span className="px-2 py-0 bg-[color:var(--color-paper-2)] rounded text-[10px] font-medium">PadSplit ID {externalRoomId}</span>}
         </div>
       </div>

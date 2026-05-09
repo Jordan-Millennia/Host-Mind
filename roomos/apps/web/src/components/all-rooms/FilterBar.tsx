@@ -57,7 +57,7 @@ export function FilterBar({ owners, properties }: { owners: Owner[]; properties:
               aria-pressed={active}
               className={`text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border transition-colors ${
                 active
-                  ? "bg-[color:var(--color-charcoal)] text-[color:var(--color-cream)] border-[color:var(--color-charcoal)]"
+                  ? "bg-[color:var(--color-ink-2)] text-[color:var(--color-paper)] border-[color:var(--color-ink-2)]"
                   : "bg-[color:var(--color-paper)] text-[color:var(--color-muted)] border-[color:var(--color-rule)] hover:border-[color:var(--color-rule-hi)]"
               }`}
             >

@@ -36,7 +36,7 @@ export function PaginationLinks({
         ) : (
           <span className="px-3 py-1 rounded border border-[color:var(--color-rule)] opacity-40">← Previous</span>
         )}
-        <span className="px-3 py-1 text-[color:var(--color-charcoal)]">Page {page} of {totalPages}</span>
+        <span className="px-3 py-1 text-[color:var(--color-ink-2)]">Page {page} of {totalPages}</span>
         {page < totalPages ? (
           <Link href={buildHref(page + 1)} className="px-3 py-1 rounded border border-[color:var(--color-rule)] hover:border-[color:var(--color-rule-hi)]">
             Next →
