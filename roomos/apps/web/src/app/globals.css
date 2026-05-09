@@ -31,13 +31,6 @@
   --color-slate: #4F5B6E;
   --color-slate-bg: #DDE2E8;
 
-  /* Phase-1C compatibility aliases (Task 24 will sweep references and remove these) */
-  --color-due: var(--color-clay);
-  --color-vacant: var(--color-clay);
-  --color-moving: var(--color-amber);
-  --color-flip: var(--color-amber);
-  --color-occupied: var(--color-green);
-
   /* Type tokens */
   --font-body: "Switzer", -apple-system, BlinkMacSystemFont, sans-serif;
   /* --font-display already set by next/font; kept here for reference. */
@@ -57,7 +50,7 @@ body {
 }
 
 ::selection {
-  background-color: var(--color-gold);
+  background-color: var(--color-coral);
   color: var(--color-ink);
 }
 

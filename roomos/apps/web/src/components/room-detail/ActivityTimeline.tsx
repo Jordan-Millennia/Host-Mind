@@ -41,9 +41,9 @@ export function ActivityTimeline({ items }: { items: Item[] }) {
 
 function dotClass(it: Item): string {
   switch (it.kind) {
-    case "payment":  return "bg-[color:var(--color-occupied)]"
-    case "scrape":   return "bg-[color:var(--color-moving)]"
-    case "moved_in": return "bg-[color:var(--color-gold)]"
+    case "payment":  return "bg-[color:var(--color-green)]"
+    case "scrape":   return "bg-[color:var(--color-amber)]"
+    case "moved_in": return "bg-[color:var(--color-coral)]"
   }
 }
 

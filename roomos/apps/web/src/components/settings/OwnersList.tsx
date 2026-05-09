@@ -35,7 +35,7 @@ export function OwnersList({ owners }: { owners: Owner[] }) {
                     type="submit"
                     disabled={o._count.properties > 0}
                     title={o._count.properties > 0 ? "Reassign properties first" : "Delete owner"}
-                    className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border border-[color:var(--color-rule)] hover:border-[color:var(--color-due)] hover:text-[color:var(--color-due)] disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border border-[color:var(--color-rule)] hover:border-[color:var(--color-clay)] hover:text-[color:var(--color-clay)] disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     Delete
                   </button>

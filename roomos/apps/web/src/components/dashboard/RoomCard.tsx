@@ -3,12 +3,12 @@ import type { RoomCardData } from "@/lib/room-queries"
 import { formatMoney, formatDate } from "@/lib/format"
 
 const STRIPE: Record<string, string> = {
-  OCCUPIED: "var(--color-occupied)",
-  VACANT: "var(--color-vacant)",
-  MOVING_IN: "var(--color-moving)",
-  MOVING_OUT: "var(--color-moving)",
-  NEEDS_FLIP: "var(--color-flip)",
-  WAITING_APPROVAL: "var(--color-flip)",
+  OCCUPIED: "var(--color-green)",
+  VACANT: "var(--color-clay)",
+  MOVING_IN: "var(--color-amber)",
+  MOVING_OUT: "var(--color-amber)",
+  NEEDS_FLIP: "var(--color-amber)",
+  WAITING_APPROVAL: "var(--color-amber)",
   INACTIVE: "var(--color-muted)",
 }
 
@@ -36,7 +36,7 @@ export function RoomCard({ room, variant }: { room: RoomCardData; variant: "past
             <span className="text-[11px] text-[color:var(--color-muted)]">
               {room.memberMonthsTenure != null ? `Member ${room.memberMonthsTenure}mo` : "—"}
             </span>
-            <span className="text-sm font-semibold tabular-nums text-[color:var(--color-due)]">
+            <span className="text-sm font-semibold tabular-nums text-[color:var(--color-clay)]">
               {formatMoney(room.currentBalance)}
             </span>
           </div>
@@ -93,11 +93,11 @@ export function RoomCard({ room, variant }: { room: RoomCardData; variant: "past
 
 function Pill({ kind, children }: { kind: "due" | "vacant" | "moving" | "flip" | "occupied"; children: React.ReactNode }) {
   const colors: Record<string, { bg: string; fg: string }> = {
-    due:      { bg: "rgba(196,93,46,0.10)",  fg: "var(--color-due)" },
-    vacant:   { bg: "rgba(163,61,61,0.10)",  fg: "var(--color-vacant)" },
-    moving:   { bg: "rgba(63,94,122,0.10)",  fg: "var(--color-moving)" },
-    flip:     { bg: "rgba(139,111,92,0.10)", fg: "var(--color-flip)" },
-    occupied: { bg: "rgba(90,122,74,0.10)",  fg: "var(--color-occupied)" },
+    due:      { bg: "rgba(196,93,46,0.10)",  fg: "var(--color-clay)" },
+    vacant:   { bg: "rgba(163,61,61,0.10)",  fg: "var(--color-clay)" },
+    moving:   { bg: "rgba(63,94,122,0.10)",  fg: "var(--color-amber)" },
+    flip:     { bg: "rgba(139,111,92,0.10)", fg: "var(--color-amber)" },
+    occupied: { bg: "rgba(90,122,74,0.10)",  fg: "var(--color-green)" },
   }
   const c = colors[kind]!
   return (

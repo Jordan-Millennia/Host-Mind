@@ -27,7 +27,7 @@ export function KpiStrip({ totalRooms, pastDue, pastDueAmount, vacant, movingThi
 }
 
 function Tile({ label, num, sub, accent }: { label: string; num: string; sub: string; accent?: "due" }) {
-  const numClass = accent === "due" ? "text-[color:var(--color-due)]" : "text-[color:var(--color-charcoal)]"
+  const numClass = accent === "due" ? "text-[color:var(--color-clay)]" : "text-[color:var(--color-charcoal)]"
   const tileClass =
     accent === "due"
       ? "border-[color:rgba(196,93,46,0.30)] bg-[color:rgba(196,93,46,0.03)]"

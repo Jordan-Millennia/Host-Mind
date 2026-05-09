@@ -3,12 +3,12 @@ import type { RoomCardData } from "@/lib/room-queries"
 import { formatMoney, formatDate } from "@/lib/format"
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  OCCUPIED:         { label: "Occupied",          color: "var(--color-occupied)" },
-  VACANT:           { label: "Vacant",            color: "var(--color-vacant)" },
-  MOVING_IN:        { label: "Moving In",         color: "var(--color-moving)" },
-  MOVING_OUT:       { label: "Moving Out",        color: "var(--color-moving)" },
-  NEEDS_FLIP:       { label: "Needs Flip",        color: "var(--color-flip)" },
-  WAITING_APPROVAL: { label: "Waiting Approval",  color: "var(--color-flip)" },
+  OCCUPIED:         { label: "Occupied",          color: "var(--color-green)" },
+  VACANT:           { label: "Vacant",            color: "var(--color-clay)" },
+  MOVING_IN:        { label: "Moving In",         color: "var(--color-amber)" },
+  MOVING_OUT:       { label: "Moving Out",        color: "var(--color-amber)" },
+  NEEDS_FLIP:       { label: "Needs Flip",        color: "var(--color-amber)" },
+  WAITING_APPROVAL: { label: "Waiting Approval",  color: "var(--color-amber)" },
   INACTIVE:         { label: "Inactive",          color: "var(--color-muted)" },
 }
 
@@ -44,7 +44,7 @@ export function RoomsTable({ rows }: { rows: RoomCardData[] }) {
                 className="border-b last:border-b-0 border-[color:var(--color-rule)] hover:bg-[color:var(--color-paper-2)]"
               >
                 <td className="px-4 py-3">
-                  <Link href={`/rooms/${r.roomId}`} className="font-semibold hover:text-[color:var(--color-gold-dark)]">
+                  <Link href={`/rooms/${r.roomId}`} className="font-semibold hover:text-[color:var(--color-coral-dark)]">
                     {r.propertyAddress}
                   </Link>
                   <span className="text-[color:var(--color-muted)]"> · Rm {r.roomNumber ?? "—"}</span>
@@ -61,7 +61,7 @@ export function RoomsTable({ rows }: { rows: RoomCardData[] }) {
                 </td>
                 <td className="px-4 py-3 text-xs">{formatDate(r.moveInDate)}</td>
                 <td className="px-4 py-3 text-xs">{formatDate(r.leaseEndDate)}</td>
-                <td className={`px-4 py-3 text-right tabular-nums ${r.daysPastDue && r.daysPastDue >= 1 ? "text-[color:var(--color-due)] font-semibold" : ""}`}>
+                <td className={`px-4 py-3 text-right tabular-nums ${r.daysPastDue && r.daysPastDue >= 1 ? "text-[color:var(--color-clay)] font-semibold" : ""}`}>
                   {formatMoney(r.currentBalance)}
                 </td>
               </tr>

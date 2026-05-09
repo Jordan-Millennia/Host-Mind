@@ -3,7 +3,7 @@ import Link from "next/link"
 export function NoDataYet() {
   return (
     <section className="max-w-2xl mx-auto py-24 text-center px-6">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-gold)]">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-coral)]">
         First-time setup
       </p>
       <h1 className="mt-6 font-[family-name:var(--font-display)] text-5xl font-bold leading-[1.1] tracking-[-0.02em]">
@@ -16,7 +16,7 @@ export function NoDataYet() {
       <div className="mt-10 flex justify-center gap-3">
         <Link
           href="/settings"
-          className="inline-flex items-center gap-2 bg-[color:var(--color-gold)] text-[color:var(--color-ink)] px-6 py-3 rounded-md text-xs font-semibold uppercase tracking-[0.12em] hover:bg-[color:var(--color-gold-light)]"
+          className="inline-flex items-center gap-2 bg-[color:var(--color-coral)] text-[color:var(--color-ink)] px-6 py-3 rounded-md text-xs font-semibold uppercase tracking-[0.12em] hover:bg-[color:var(--color-coral-light)]"
         >
           Connect PadSplit
           <span aria-hidden>→</span>

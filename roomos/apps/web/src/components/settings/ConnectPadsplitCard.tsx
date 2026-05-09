@@ -48,11 +48,11 @@ export function ConnectPadsplitCard({
 
   const buttonClass =
     "text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md " +
-    "bg-[color:var(--color-gold)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-gold-light)] disabled:opacity-50 disabled:cursor-not-allowed"
+    "bg-[color:var(--color-coral)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-coral-light)] disabled:opacity-50 disabled:cursor-not-allowed"
 
   if (!workerOnline) {
     return (
-      <div className="text-sm text-[color:var(--color-due)] italic">
+      <div className="text-sm text-[color:var(--color-clay)] italic">
         Worker offline. Start the Mac Studio worker (see <code>roomos/packages/worker/DEPLOYMENT-1B.md</code>) before connecting PadSplit.
       </div>
     )

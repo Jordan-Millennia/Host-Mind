@@ -15,7 +15,7 @@ export function RoomHeader({
     <div className="flex items-start justify-between mb-7">
       <div>
         <p className="text-xs text-[color:var(--color-muted)] mb-2">
-          <Link href="/rooms" className="hover:text-[color:var(--color-gold-dark)]">← All rooms</Link>
+          <Link href="/rooms" className="hover:text-[color:var(--color-coral-dark)]">← All rooms</Link>
           {" · "}
           {address}
           {" · "}

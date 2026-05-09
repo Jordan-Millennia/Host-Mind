@@ -33,7 +33,7 @@ export function CsvImportForm() {
         <button
           type="submit"
           disabled={pending}
-          className="text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md bg-[color:var(--color-gold)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-gold-light)] disabled:opacity-50"
+          className="text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md bg-[color:var(--color-coral)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-coral-light)] disabled:opacity-50"
         >
           {pending ? "Importing…" : "Import"}
         </button>
@@ -47,7 +47,7 @@ export function CsvImportForm() {
             assigned <strong>{report.assigned}</strong> properties.
           </p>
           {report.parseErrors.length > 0 && (
-            <details className="mt-2 text-[color:var(--color-due)]">
+            <details className="mt-2 text-[color:var(--color-clay)]">
               <summary className="cursor-pointer">{report.parseErrors.length} parse errors</summary>
               <ul className="mt-1 text-xs list-disc pl-5">
                 {report.parseErrors.map((e, i) => <li key={i}>Line {e.line}: {e.message}</li>)}

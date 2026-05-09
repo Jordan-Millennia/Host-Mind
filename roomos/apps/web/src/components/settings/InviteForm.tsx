@@ -44,13 +44,13 @@ export function InviteForm({ pending }: { pending: Pending[] }) {
         <button
           type="submit"
           disabled={submitting}
-          className="text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md bg-[color:var(--color-gold)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-gold-light)] disabled:opacity-50"
+          className="text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md bg-[color:var(--color-coral)] text-[color:var(--color-ink)] hover:bg-[color:var(--color-coral-light)] disabled:opacity-50"
         >
           {submitting ? "Generating…" : "Generate invite link"}
         </button>
       </form>
 
-      {error && <p className="text-sm text-[color:var(--color-due)]">{error}</p>}
+      {error && <p className="text-sm text-[color:var(--color-clay)]">{error}</p>}
 
       {issued && (
         <div className="p-4 rounded-md border border-[color:var(--color-rule-hi)] bg-[color:var(--color-paper-2)]">
@@ -86,7 +86,7 @@ export function InviteForm({ pending }: { pending: Pending[] }) {
                     <td className="px-4 py-2 text-right">
                       <form action={revokeInvitation}>
                         <input type="hidden" name="id" value={p.id} />
-                        <button type="submit" className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border border-[color:var(--color-rule)] hover:border-[color:var(--color-due)] hover:text-[color:var(--color-due)]">
+                        <button type="submit" className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border border-[color:var(--color-rule)] hover:border-[color:var(--color-clay)] hover:text-[color:var(--color-clay)]">
                           Revoke
                         </button>
                       </form>

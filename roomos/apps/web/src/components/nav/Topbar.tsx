@@ -29,7 +29,7 @@ export function Topbar({ activeHref, orgId }: { activeHref: string; orgId: strin
               >
                 {item.label}
                 {active && (
-                  <span className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-[color:var(--color-gold)]" />
+                  <span className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-[color:var(--color-coral)]" />
                 )}
               </Link>
             )

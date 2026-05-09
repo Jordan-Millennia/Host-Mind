@@ -20,7 +20,7 @@ export function SettingsTabs({ activeHref }: { activeHref: string }) {
             }`}
           >
             {t.label}
-            {active && <span className="absolute -bottom-px left-0 right-0 h-[2px] bg-[color:var(--color-gold)]" />}
+            {active && <span className="absolute -bottom-px left-0 right-0 h-[2px] bg-[color:var(--color-coral)]" />}
           </Link>
         )
       })}
