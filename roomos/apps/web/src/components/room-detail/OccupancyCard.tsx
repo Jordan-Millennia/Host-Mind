@@ -10,6 +10,10 @@ type Occupancy = {
   moveInDate: Date | null
 }
 
+function calcTenureDays(firstSeenAt: Date): number {
+  return Math.floor((Date.now() - new Date(firstSeenAt).getTime()) / (24 * 60 * 60 * 1000))
+}
+
 export function OccupancyCard({ member, occupancy }: { member: Member | null; occupancy: Occupancy | null }) {
   if (!member || !occupancy) {
     return (
@@ -23,7 +27,7 @@ export function OccupancyCard({ member, occupancy }: { member: Member | null; oc
   }
 
   const initials = member.name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase()
-  const tenureDays = Math.floor((Date.now() - new Date(member.firstSeenAt).getTime()) / (24 * 60 * 60 * 1000))
+  const tenureDays = calcTenureDays(member.firstSeenAt)
 
   return (
     <div className="p-6 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)]">
