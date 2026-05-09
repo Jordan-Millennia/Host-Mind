@@ -27,3 +27,28 @@ export function formatDaysAgo(d: Date | null | undefined, now: Date = new Date()
   if (days === 1) return "1 day ago"
   return `${days} days ago`
 }
+
+/**
+ * Compute SVG `stroke-dasharray` segments for a donut chart.
+ * Total stroke length is 2πr; each segment proportional to its count.
+ */
+export type DonutSegment = { length: number; offset: number; color: "occupied" | "vacant" | "moving" }
+
+export function donutSegments(parts: { occupied: number; vacant: number; moving?: number }, radius = 14): DonutSegment[] {
+  const total = parts.occupied + parts.vacant + (parts.moving ?? 0)
+  if (total === 0) return []
+  const circumference = 2 * Math.PI * radius
+  const seg: DonutSegment[] = []
+  let offset = 0
+  for (const [color, count] of [
+    ["occupied", parts.occupied],
+    ["moving", parts.moving ?? 0],
+    ["vacant", parts.vacant],
+  ] as const) {
+    if (count === 0) continue
+    const length = (count / total) * circumference
+    seg.push({ length, offset, color })
+    offset -= length
+  }
+  return seg
+}
