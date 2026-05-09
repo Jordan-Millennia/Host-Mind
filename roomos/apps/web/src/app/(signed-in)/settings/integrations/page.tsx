@@ -3,6 +3,10 @@ import { requireRole } from "@/lib/auth"
 import { PlatformCard } from "@/components/settings/PlatformCard"
 import { ConnectPadsplitCard } from "@/components/settings/ConnectPadsplitCard"
 
+function isFreshHeartbeat(lastSeenAt: Date): boolean {
+    return Date.now() - lastSeenAt.getTime() < 5 * 60_000
+}
+
 export default async function IntegrationsPage() {
   const ctx = await requireRole("ADMIN")
 
@@ -17,8 +21,8 @@ export default async function IntegrationsPage() {
   const heartbeat = await prisma.workerHeartbeat.findFirst({
     orderBy: { lastSeenAt: "desc" },
   })
-  const workerOnline = !!heartbeat && Date.now() - heartbeat.lastSeenAt.getTime() < 5 * 60_000
-
+    const workerOnline = !!heartbeat && isFreshHeartbeat(heartbeat.lastSeenAt)
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <PlatformCard

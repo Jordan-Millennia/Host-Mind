@@ -11,7 +11,7 @@ export default async function SignedInLayout({ children }: { children: React.Rea
   const path = hdrs.get("x-pathname") ?? "/rooms"
 
   return (
-    <div className="min-h-screen bg-[color:var(--color-cream)]">
+    <div className="min-h-screen bg-[color:var(--color-paper)]">
       <Topbar activeHref={normalize(path)} orgId={ctx.orgId} />
       <div>{children}</div>
     </div>

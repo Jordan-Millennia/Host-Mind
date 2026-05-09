@@ -1,7 +1,7 @@
 export function BrandStack() {
   return (
     <div className="flex items-baseline gap-3">
-      <span className="font-[family-name:var(--font-display)] text-base font-bold text-[color:var(--color-charcoal)]">
+      <span className="font-[family-name:var(--font-display)] text-base font-bold text-[color:var(--color-ink-2)]">
         CoHost Management
       </span>
       <span className="block w-px h-3 bg-[color:rgba(26,26,26,0.18)] self-center" />

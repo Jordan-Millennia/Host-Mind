@@ -20,7 +20,7 @@ export function TeamList({ users, currentUserId }: { users: TeamUser[]; currentU
         <tbody>
           {users.map((u) => {
             const isSelf = u.id === currentUserId
-            const adminStyle = { color: "var(--color-gold-dark)", borderColor: "rgba(184,147,42,0.40)", background: "rgba(184,147,42,0.10)" }
+            const adminStyle = { color: "var(--color-coral-dark)", borderColor: "rgba(184,147,42,0.40)", background: "rgba(184,147,42,0.10)" }
             const otherStyle = { color: "var(--color-muted)", borderColor: "var(--color-rule)", background: "transparent" }
             return (
               <tr key={u.id} className="border-b last:border-b-0 border-[color:var(--color-rule)]">

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest"
-import { formatMoney, formatDate, formatDaysAgo } from "@/lib/format"
+import { formatMoney, formatDate, formatDaysAgo, donutSegments } from "@/lib/format"
 
 describe("formatMoney", () => {
   it("formats decimal-string dollars with thousands separators", () => {
@@ -38,5 +38,24 @@ describe("formatDaysAgo", () => {
     expect(formatDaysAgo(new Date("2026-05-03T08:00:00Z"))).toBe("today")
     expect(formatDaysAgo(new Date("2026-05-02T08:00:00Z"))).toBe("1 day ago")
     expect(formatDaysAgo(new Date("2026-04-28T08:00:00Z"))).toBe("5 days ago")
+  })
+})
+
+describe("donutSegments", () => {
+  it("returns empty array when total is 0", () => {
+    expect(donutSegments({ occupied: 0, vacant: 0 })).toEqual([])
+  })
+
+  it("splits 4/2 into proportional lengths summing to ~88", () => {
+    const seg = donutSegments({ occupied: 4, vacant: 2 })
+    const sum = seg.reduce((s, x) => s + x.length, 0)
+    expect(sum).toBeCloseTo(2 * Math.PI * 14, 1)
+    expect(seg[0]?.color).toBe("occupied")
+    expect(seg[1]?.color).toBe("vacant")
+  })
+
+  it("places moving segment between occupied and vacant", () => {
+    const seg = donutSegments({ occupied: 3, moving: 1, vacant: 2 })
+    expect(seg.map((s) => s.color)).toEqual(["occupied", "moving", "vacant"])
   })
 })

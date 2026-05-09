@@ -10,7 +10,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
   if (ctx.role !== "ADMIN") {
     return (
       <main className="px-7 py-16 max-w-2xl mx-auto text-center">
-        <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-gold)] font-semibold">
+        <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-coral)] font-semibold">
           Restricted
         </p>
         <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold mt-4">

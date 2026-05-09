@@ -19,6 +19,7 @@
     "@roomos/db": "workspace:*",
     "bullmq": "^5.34.0",
     "dotenv": "^16.4.5",
+    "gray-matter": "^4.0.3",
     "ioredis": "^5.4.1",
     "jsdom": "^29.1.1",
     "pino": "^9.5.0",

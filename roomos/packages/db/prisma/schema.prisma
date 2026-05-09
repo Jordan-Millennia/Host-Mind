@@ -48,6 +48,21 @@ enum SyncKind {
   OCCUPANCY
   FINANCIAL
   INTERACTIVE_LOGIN
+  VAULT_SYNC
+}
+
+enum FlagSeverity {
+  DANGER
+  WARN
+  INFO
+  OK
+}
+
+enum FlagSource {
+  VAULT_SYNC
+  AIRBNB
+  REI_HUB
+  MANUAL
 }
 
 enum SyncRunStatus {
@@ -83,6 +98,7 @@ model Org {
   auditLogs         AuditLog[]
   workerHeartbeats  WorkerHeartbeat[]
   teamInvitations   TeamInvitation[]
+  propertyFlags     PropertyFlag[]
 
   @@map("orgs")
 }
@@ -116,6 +132,8 @@ model Property {
   orgId     String   @map("org_id")
   ownerId   String?  @map("owner_id")  // nullable until mapped during bootstrap
   name      String?
+  padsplitPropertyId String?  @unique @map("padsplit_property_id")
+  vaultFilePath      String?  @map("vault_file_path")
   address   String
   city      String?
   state     String?
@@ -127,6 +145,7 @@ model Property {
   org   Org    @relation(fields: [orgId], references: [id], onDelete: Cascade)
   owner Owner? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
   rooms Room[]
+  flags PropertyFlag[]
 
   @@index([orgId])
   @@index([ownerId])
@@ -188,6 +207,7 @@ model Member {
   phone            String?
   photoUrl         String?  @map("photo_url")
   profileUrl       String?  @map("profile_url")
+  memberDossierPath String? @map("member_dossier_path")
   firstSeenAt      DateTime @default(now()) @map("first_seen_at")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
@@ -256,6 +276,28 @@ model PaymentEvent {
   @@unique([memberId, externalEventId])
   @@index([orgId, eventDate])
   @@map("payment_events")
+}
+
+model PropertyFlag {
+  id         String       @id @default(cuid())
+  orgId      String       @map("org_id")
+  propertyId String       @map("property_id")
+  roomId     String?      @map("room_id")
+  severity   FlagSeverity
+  title      String
+  body       String?      @db.Text
+  source     FlagSource
+  sourceRef  String?      @map("source_ref")
+  openedAt   DateTime     @default(now()) @map("opened_at")
+  closedAt   DateTime?    @map("closed_at")
+
+  org      Org      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, source, sourceRef])
+  @@index([orgId, propertyId, closedAt])
+  @@index([orgId, severity, closedAt])
+  @@map("property_flags")
 }
 
 // =====================================================================

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.cohostmgmt.roomos.vault</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__PNPM_BIN__</string>
+    <string>--filter</string>
+    <string>@roomos/worker</string>
+    <string>start</string>
+    <string>--</string>
+    <string>scheduler</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>__REPO_ROOT__/roomos</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/RoomOS/vault.stdout.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/RoomOS/vault.stderr.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>VAULT_PATH</key>
+    <string>__VAULT_PATH__</string>
+    <key>DATABASE_URL</key>
+    <string>__DATABASE_URL__</string>
+    <key>REDIS_URL</key>
+    <string>__REDIS_URL__</string>
+    <key>WORKER_HEARTBEAT_URL</key>
+    <string>__WORKER_HEARTBEAT_URL__</string>
+    <key>WORKER_TOKEN</key>
+    <string>__WORKER_TOKEN__</string>
+  </dict>
+</dict>
+</plist>

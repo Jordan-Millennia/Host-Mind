@@ -14,10 +14,10 @@ export function PlatformCard({
   children?: ReactNode
 }) {
   const statusColor = status === "connected"
-    ? "var(--color-occupied)"
+    ? "var(--color-green)"
     : status === "coming_soon"
     ? "var(--color-muted)"
-    : "var(--color-due)"
+    : "var(--color-clay)"
   const statusLabel = status === "connected" ? "Connected" : status === "coming_soon" ? "Phase 2+" : "Not connected"
 
   return (

@@ -47,7 +47,7 @@ export default async function OwnersPage() {
           />
           <button
             type="submit"
-            className="text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md bg-[color:var(--color-charcoal)] text-[color:var(--color-cream)] hover:bg-[color:var(--color-ink)]"
+            className="text-[10px] font-semibold uppercase tracking-[0.14em] px-4 py-[8px] rounded-md bg-[color:var(--color-ink-2)] text-[color:var(--color-paper)] hover:bg-[color:var(--color-ink)]"
           >
             Add owner
           </button>

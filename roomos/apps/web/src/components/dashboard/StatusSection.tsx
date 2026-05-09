@@ -4,10 +4,10 @@ import { RoomCard } from "./RoomCard"
 import { EmptyShim } from "./EmptyShim"
 
 const STATUS_LABEL: Record<string, { name: string; color: string; chipKey: string }> = {
-  past_due:   { name: "Past Due",          color: "var(--color-due)",      chipKey: "past_due" },
-  vacant:     { name: "Vacant",            color: "var(--color-vacant)",   chipKey: "vacant" },
-  moving:     { name: "Moving This Week",  color: "var(--color-moving)",   chipKey: "moving" },
-  needs_flip: { name: "Needs Flip",        color: "var(--color-flip)",     chipKey: "needs_flip" },
+  past_due:   { name: "Past Due",          color: "var(--color-clay)",      chipKey: "past_due" },
+  vacant:     { name: "Vacant",            color: "var(--color-clay)",   chipKey: "vacant" },
+  moving:     { name: "Moving This Week",  color: "var(--color-amber)",   chipKey: "moving" },
+  needs_flip: { name: "Needs Flip",        color: "var(--color-amber)",     chipKey: "needs_flip" },
 }
 
 export function StatusSection({
@@ -36,7 +36,7 @@ export function StatusSection({
         {totalCount > rooms.length && (
           <Link
             href={`/all-rooms?status=${meta.chipKey}`}
-            className="text-[11px] font-medium text-[color:var(--color-muted)] hover:text-[color:var(--color-gold-dark)]"
+            className="text-[11px] font-medium text-[color:var(--color-muted)] hover:text-[color:var(--color-coral-dark)]"
           >
             View all →
           </Link>

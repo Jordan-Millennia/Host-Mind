@@ -24,12 +24,12 @@ export function Topbar({ activeHref, orgId }: { activeHref: string; orgId: strin
                 key={item.href}
                 href={item.href}
                 className={`relative text-[10px] font-semibold uppercase tracking-[0.18em] py-1.5 ${
-                  active ? "text-[color:var(--color-charcoal)]" : "text-[color:var(--color-muted)] hover:text-[color:var(--color-charcoal)]"
+                  active ? "text-[color:var(--color-ink-2)]" : "text-[color:var(--color-muted)] hover:text-[color:var(--color-ink-2)]"
                 }`}
               >
                 {item.label}
                 {active && (
-                  <span className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-[color:var(--color-gold)]" />
+                  <span className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-[color:var(--color-coral)]" />
                 )}
               </Link>
             )

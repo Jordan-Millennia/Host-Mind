@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { log } from "./log"
 import { interactiveLogin, checkPadsplitSession } from "./padsplit/login"
+import { processVaultSync } from "./jobs/vault-sync"
 
 async function main() {
   const [command, ...rest] = process.argv.slice(2)
@@ -41,6 +42,11 @@ async function main() {
       }
       log.error({ job }, "unknown job")
       process.exit(1)
+    }
+
+    case "vault-sync": {
+      await processVaultSync()
+      break
     }
 
     case "scheduler": {

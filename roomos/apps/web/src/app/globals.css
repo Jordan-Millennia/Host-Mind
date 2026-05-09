@@ -3,29 +3,37 @@
 @import "shadcn/tailwind.css";
 
 @theme {
-  /* CoHost Management brand — see spec section 13 */
-  --color-cream: #F8F6F1;
-  --color-paper: #FDFCF8;
-  --color-paper-2: #F2EEE6;
-  --color-charcoal: #1A1A1A;
-  --color-ink: #0D0D0D;
-  --color-muted: #6B645A;
-  --color-rule: rgba(26, 26, 26, 0.08);
-  --color-rule-hi: rgba(212, 168, 67, 0.4);
-  --color-gold: #D4A843;
-  --color-gold-light: #E0BC5A;
-  --color-gold-dark: #B8932A;
+  /* Surfaces — warm cream paper */
+  --color-paper: #F4EDE2;
+  --color-paper-2: #EDE5D6;
+  --color-surface: #FAF6EC;
 
-  /* Status palette — earth tones, see spec */
-  --color-due: #C45D2E;
-  --color-vacant: #A33D3D;
-  --color-moving: #3F5E7A;
-  --color-flip: #8B6F5C;
-  --color-occupied: #5A7A4A;
+  /* Ink — warm near-blacks */
+  --color-ink: #1A1610;
+  --color-ink-2: #4F4639;
+  --color-ink-3: #8B816E;
 
-  /* Fonts (wired up via next/font in layout.tsx — these vars are referenced) */
-  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
-  --font-body: var(--font-inter), system-ui, -apple-system, sans-serif;
+  /* Hairlines */
+  --color-hairline: #DDD3BE;
+  --color-hairline-2: #E8E0CD;
+
+  /* Brand accent — restrained coral */
+  --color-coral: #B14D2C;
+  --color-coral-soft: #C15F3C;
+
+  /* Status palette — newspaper, not signal-light */
+  --color-green: #4A6B4F;
+  --color-green-bg: #DCE5DA;
+  --color-clay: #8B3A2E;
+  --color-clay-bg: #ECDCD3;
+  --color-amber: #9A6E1F;
+  --color-amber-bg: #EDE2C5;
+  --color-slate: #4F5B6E;
+  --color-slate-bg: #DDE2E8;
+
+  /* Type tokens */
+  --font-body: "Switzer", -apple-system, BlinkMacSystemFont, sans-serif;
+  /* --font-display already set by next/font; kept here for reference. */
 }
 
 html {
@@ -33,16 +41,16 @@ html {
 }
 
 body {
-  background-color: var(--color-cream);
-  color: var(--color-charcoal);
+  background: var(--color-paper);
+  color: var(--color-ink);
   font-family: var(--font-body);
+  font-feature-settings: "tnum" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-variant-numeric: tabular-nums;
 }
 
 ::selection {
-  background-color: var(--color-gold);
+  background-color: var(--color-coral);
   color: var(--color-ink);
 }
 
