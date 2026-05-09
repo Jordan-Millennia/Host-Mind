@@ -31,7 +31,22 @@ psql "$DATABASE_URL" -c '\dt property_flags' -c '\d property_flags'
 
 ## 3. Install the new vault-sync agent
 
-(Filled in by Task 18 of the implementation plan.)
+```bash
+cd roomos/packages/worker/launchd
+./install.sh --vault --vault-path /Users/jordanruvalcaba/Documents/CoHost-Knowledge-Hub
+```
+
+Expected: `~/Library/LaunchAgents/com.cohostmgmt.roomos.vault.plist` is created and loaded. Confirm with:
+
+```bash
+launchctl list | grep cohostmgmt.roomos.vault
+```
+
+The first sync should fire within seconds. Tail logs:
+
+```bash
+tail -f ~/Library/Logs/RoomOS/vault.stdout.log
+```
 
 ## 4. Set the VAULT_PATH env var
 
