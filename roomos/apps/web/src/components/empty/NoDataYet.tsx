@@ -7,9 +7,9 @@ export function NoDataYet() {
         First-time setup
       </p>
       <h1 className="mt-6 font-[family-name:var(--font-display)] text-5xl font-bold leading-[1.1] tracking-[-0.02em]">
-        No rooms <span className="italic text-[color:var(--color-muted)]">— yet.</span>
+        No rooms <span className="italic text-[color:var(--color-ink-3)]">— yet.</span>
       </h1>
-      <p className="mt-6 text-base leading-relaxed text-[color:var(--color-muted)] max-w-md mx-auto">
+      <p className="mt-6 text-base leading-relaxed text-[color:var(--color-ink-3)] max-w-md mx-auto">
         RoomOS hasn&apos;t been connected to PadSplit yet. Once you log in once on this Mac, the scraper
         will discover all 70 properties and populate this view.
       </p>
@@ -22,7 +22,7 @@ export function NoDataYet() {
           <span aria-hidden>→</span>
         </Link>
       </div>
-      <p className="mt-12 text-[11px] text-[color:var(--color-muted)] italic">
+      <p className="mt-12 text-[11px] text-[color:var(--color-ink-3)] italic">
         The &quot;Connect PadSplit&quot; flow lands in Phase 1D.
       </p>
     </section>

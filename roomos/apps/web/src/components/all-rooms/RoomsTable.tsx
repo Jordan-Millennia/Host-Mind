@@ -9,23 +9,23 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   MOVING_OUT:       { label: "Moving Out",        color: "var(--color-amber)" },
   NEEDS_FLIP:       { label: "Needs Flip",        color: "var(--color-amber)" },
   WAITING_APPROVAL: { label: "Waiting Approval",  color: "var(--color-amber)" },
-  INACTIVE:         { label: "Inactive",          color: "var(--color-muted)" },
+  INACTIVE:         { label: "Inactive",          color: "var(--color-ink-3)" },
 }
 
 export function RoomsTable({ rows }: { rows: RoomCardData[] }) {
   if (rows.length === 0) {
     return (
-      <div className="px-6 py-10 text-center text-sm italic text-[color:var(--color-muted)] border border-[color:var(--color-rule)] rounded-md">
+      <div className="px-6 py-10 text-center text-sm italic text-[color:var(--color-ink-3)] border border-[color:var(--color-hairline)] rounded-md">
         No rooms match the current filters.
       </div>
     )
   }
 
   return (
-    <div className="border border-[color:var(--color-rule)] rounded-md overflow-hidden bg-[color:var(--color-paper)]">
+    <div className="border border-[color:var(--color-hairline)] rounded-md overflow-hidden bg-[color:var(--color-paper)]">
       <table className="w-full text-sm">
-        <thead className="bg-[color:var(--color-paper-2)] border-b border-[color:var(--color-rule)]">
-          <tr className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+        <thead className="bg-[color:var(--color-paper-2)] border-b border-[color:var(--color-hairline)]">
+          <tr className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-ink-3)]">
             <th className="text-left px-4 py-3">Property · Room</th>
             <th className="text-left px-4 py-3">Owner</th>
             <th className="text-left px-4 py-3">Member</th>
@@ -41,16 +41,16 @@ export function RoomsTable({ rows }: { rows: RoomCardData[] }) {
             return (
               <tr
                 key={r.roomId}
-                className="border-b last:border-b-0 border-[color:var(--color-rule)] hover:bg-[color:var(--color-paper-2)]"
+                className="border-b last:border-b-0 border-[color:var(--color-hairline)] hover:bg-[color:var(--color-paper-2)]"
               >
                 <td className="px-4 py-3">
                   <Link href={`/rooms/${r.roomId}`} className="font-semibold hover:text-[color:var(--color-coral-dark)]">
                     {r.propertyAddress}
                   </Link>
-                  <span className="text-[color:var(--color-muted)]"> · Rm {r.roomNumber ?? "—"}</span>
+                  <span className="text-[color:var(--color-ink-3)]"> · Rm {r.roomNumber ?? "—"}</span>
                 </td>
-                <td className="px-4 py-3 text-[color:var(--color-muted)]">{r.ownerName ?? "—"}</td>
-                <td className="px-4 py-3">{r.memberName ?? <span className="italic text-[color:var(--color-muted)]">Vacant</span>}</td>
+                <td className="px-4 py-3 text-[color:var(--color-ink-3)]">{r.ownerName ?? "—"}</td>
+                <td className="px-4 py-3">{r.memberName ?? <span className="italic text-[color:var(--color-ink-3)]">Vacant</span>}</td>
                 <td className="px-4 py-3">
                   <span
                     className="text-[10px] font-semibold uppercase tracking-[0.12em] px-2 py-[2px] rounded border"

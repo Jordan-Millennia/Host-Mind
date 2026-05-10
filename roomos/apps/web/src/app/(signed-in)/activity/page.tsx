@@ -15,21 +15,21 @@ export default async function ActivityPage() {
 
   return (
     <main className="px-7 py-10 max-w-[1400px] mx-auto">
-      <div className="flex items-end justify-between pb-6 mb-6 border-b border-[color:var(--color-rule)]">
+      <div className="flex items-end justify-between pb-6 mb-6 border-b border-[color:var(--color-hairline)]">
         <div>
           <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight">
-            Activity <span className="italic text-[color:var(--color-muted)]">— sync history</span>
+            Activity <span className="italic text-[color:var(--color-ink-3)]">— sync history</span>
           </h1>
-          <p className="mt-2 text-sm text-[color:var(--color-muted)]">
+          <p className="mt-2 text-sm text-[color:var(--color-ink-3)]">
             Most recent {runs.length} scrape attempts.
           </p>
         </div>
       </div>
 
-      <div className="border border-[color:var(--color-rule)] rounded-md overflow-hidden bg-[color:var(--color-paper)]">
+      <div className="border border-[color:var(--color-hairline)] rounded-md overflow-hidden bg-[color:var(--color-paper)]">
         <table className="w-full text-sm">
-          <thead className="bg-[color:var(--color-paper-2)] border-b border-[color:var(--color-rule)]">
-            <tr className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+          <thead className="bg-[color:var(--color-paper-2)] border-b border-[color:var(--color-hairline)]">
+            <tr className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-ink-3)]">
               <th className="text-left px-4 py-3">Started</th>
               <th className="text-left px-4 py-3">Kind</th>
               <th className="text-left px-4 py-3">Platform</th>
@@ -43,12 +43,12 @@ export default async function ActivityPage() {
               const ms = r.completedAt ? r.completedAt.getTime() - r.startedAt.getTime() : null
               const dur = ms == null ? "running" : ms > 60_000 ? `${Math.round(ms/60_000)}m` : `${Math.round(ms/1000)}s`
               return (
-                <tr key={r.id} className="border-b last:border-b-0 border-[color:var(--color-rule)]">
+                <tr key={r.id} className="border-b last:border-b-0 border-[color:var(--color-hairline)]">
                   <td className="px-4 py-3">
                     <div>{formatDate(r.startedAt)}</div>
-                    <div className="text-[11px] text-[color:var(--color-muted)]">{formatDaysAgo(r.startedAt)}</div>
+                    <div className="text-[11px] text-[color:var(--color-ink-3)]">{formatDaysAgo(r.startedAt)}</div>
                   </td>
-                  <td className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-muted)]">{r.kind}</td>
+                  <td className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-ink-3)]">{r.kind}</td>
                   <td className="px-4 py-3">{r.platform}</td>
                   <td className="px-4 py-3">
                     <span
@@ -59,7 +59,7 @@ export default async function ActivityPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right tabular-nums">{r.itemsSynced}</td>
-                  <td className="px-4 py-3 text-xs text-[color:var(--color-muted)]">{dur}</td>
+                  <td className="px-4 py-3 text-xs text-[color:var(--color-ink-3)]">{dur}</td>
                 </tr>
               )
             })}

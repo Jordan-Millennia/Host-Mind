@@ -17,11 +17,11 @@ function calcTenureDays(firstSeenAt: Date): number {
 export function OccupancyCard({ member, occupancy }: { member: Member | null; occupancy: Occupancy | null }) {
   if (!member || !occupancy) {
     return (
-      <div className="p-6 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)]">
-        <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)] mb-2">
+      <div className="p-6 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]">
+        <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-ink-3)] mb-2">
           Current occupancy
         </h2>
-        <p className="italic text-[color:var(--color-muted)]">No active member.</p>
+        <p className="italic text-[color:var(--color-ink-3)]">No active member.</p>
       </div>
     )
   }
@@ -30,8 +30,8 @@ export function OccupancyCard({ member, occupancy }: { member: Member | null; oc
   const tenureDays = calcTenureDays(member.firstSeenAt)
 
   return (
-    <div className="p-6 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)]">
-      <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)] mb-3">
+    <div className="p-6 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-ink-3)] mb-3">
         Current occupancy
       </h2>
       <div className="flex items-center gap-4">
@@ -53,7 +53,7 @@ export function OccupancyCard({ member, occupancy }: { member: Member | null; oc
               </span>
             )}
           </div>
-          <div className="text-xs text-[color:var(--color-muted)] mt-1">
+          <div className="text-xs text-[color:var(--color-ink-3)] mt-1">
             Member since {formatDate(member.firstSeenAt)} · {tenureDays} days in residence
           </div>
         </div>
@@ -72,7 +72,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
   const color = accent === "due" ? "text-[color:var(--color-clay)]" : "text-[color:var(--color-ink-2)]"
   return (
     <div className="bg-[color:var(--color-paper-2)] p-3 rounded">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-muted)]">{label}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-ink-3)]">{label}</div>
       <div className={`mt-1 text-base font-bold tabular-nums ${color}`}>{value}</div>
     </div>
   )

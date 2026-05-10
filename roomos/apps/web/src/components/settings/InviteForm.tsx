@@ -35,9 +35,9 @@ export function InviteForm({ pending }: { pending: Pending[] }) {
           type="email"
           placeholder="teammate@cohostmgmt.net"
           required
-          className="text-sm px-3 py-2 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)] flex-1 min-w-[220px]"
+          className="text-sm px-3 py-2 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] flex-1 min-w-[220px]"
         />
-        <select name="role" defaultValue="AGENT" className="text-sm px-2 py-2 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)]">
+        <select name="role" defaultValue="AGENT" className="text-sm px-2 py-2 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]">
           <option value="AGENT">AGENT</option>
           <option value="ADMIN">ADMIN</option>
         </select>
@@ -53,17 +53,17 @@ export function InviteForm({ pending }: { pending: Pending[] }) {
       {error && <p className="text-sm text-[color:var(--color-clay)]">{error}</p>}
 
       {issued && (
-        <div className="p-4 rounded-md border border-[color:var(--color-rule-hi)] bg-[color:var(--color-paper-2)]">
-          <p className="text-xs text-[color:var(--color-muted)] mb-2">
+        <div className="p-4 rounded-md border border-[color:var(--color-hairline-hi)] bg-[color:var(--color-paper-2)]">
+          <p className="text-xs text-[color:var(--color-ink-3)] mb-2">
             Share this link with <strong>{issued.email}</strong>. It expires in 14 days.
           </p>
           <div className="flex gap-2 items-center">
-            <code className="text-xs flex-1 px-3 py-2 bg-[color:var(--color-paper)] border border-[color:var(--color-rule)] rounded break-all">
+            <code className="text-xs flex-1 px-3 py-2 bg-[color:var(--color-paper)] border border-[color:var(--color-hairline)] rounded break-all">
               {issued.url}
             </code>
             <button
               onClick={() => copy(issued.url)}
-              className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[8px] rounded-md border border-[color:var(--color-rule)] hover:border-[color:var(--color-rule-hi)]"
+              className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[8px] rounded-md border border-[color:var(--color-hairline)] hover:border-[color:var(--color-hairline-hi)]"
             >
               Copy
             </button>
@@ -73,20 +73,20 @@ export function InviteForm({ pending }: { pending: Pending[] }) {
 
       {pending.length > 0 && (
         <div>
-          <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)] mb-2">
+          <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-ink-3)] mb-2">
             Pending invitations ({pending.length})
           </h3>
-          <div className="border border-[color:var(--color-rule)] rounded-md overflow-hidden bg-[color:var(--color-paper)]">
+          <div className="border border-[color:var(--color-hairline)] rounded-md overflow-hidden bg-[color:var(--color-paper)]">
             <table className="w-full text-sm">
               <tbody>
                 {pending.map((p) => (
-                  <tr key={p.id} className="border-b last:border-b-0 border-[color:var(--color-rule)]">
+                  <tr key={p.id} className="border-b last:border-b-0 border-[color:var(--color-hairline)]">
                     <td className="px-4 py-2">{p.email}</td>
-                    <td className="px-4 py-2 text-[color:var(--color-muted)]">{p.role}</td>
+                    <td className="px-4 py-2 text-[color:var(--color-ink-3)]">{p.role}</td>
                     <td className="px-4 py-2 text-right">
                       <form action={revokeInvitation}>
                         <input type="hidden" name="id" value={p.id} />
-                        <button type="submit" className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border border-[color:var(--color-rule)] hover:border-[color:var(--color-clay)] hover:text-[color:var(--color-clay)]">
+                        <button type="submit" className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border border-[color:var(--color-hairline)] hover:border-[color:var(--color-clay)] hover:text-[color:var(--color-clay)]">
                           Revoke
                         </button>
                       </form>

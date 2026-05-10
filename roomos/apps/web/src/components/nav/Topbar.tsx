@@ -4,6 +4,7 @@ import { BrandStack } from "./BrandStack"
 import { SyncPill } from "./SyncPill"
 
 const NAV = [
+  { href: "/properties", label: "Properties" },
   { href: "/rooms", label: "Rooms" },
   { href: "/all-rooms", label: "All Rooms" },
   { href: "/owners", label: "Owners" },
@@ -13,7 +14,7 @@ const NAV = [
 
 export function Topbar({ activeHref, orgId }: { activeHref: string; orgId: string }) {
   return (
-    <header className="border-b border-[color:var(--color-rule)] bg-[color:var(--color-paper)]">
+    <header className="border-b border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]">
       <div className="flex items-center justify-between px-7 py-4">
         <BrandStack />
         <nav className="flex gap-7">
@@ -24,7 +25,7 @@ export function Topbar({ activeHref, orgId }: { activeHref: string; orgId: strin
                 key={item.href}
                 href={item.href}
                 className={`relative text-[10px] font-semibold uppercase tracking-[0.18em] py-1.5 ${
-                  active ? "text-[color:var(--color-ink-2)]" : "text-[color:var(--color-muted)] hover:text-[color:var(--color-ink-2)]"
+                  active ? "text-[color:var(--color-ink-2)]" : "text-[color:var(--color-ink-3)] hover:text-[color:var(--color-ink-2)]"
                 }`}
               >
                 {item.label}
@@ -37,7 +38,7 @@ export function Topbar({ activeHref, orgId }: { activeHref: string; orgId: strin
         </nav>
         <div className="flex items-center gap-4">
           <SyncPill orgId={orgId} />
-          <UserButton appearance={{ variables: { colorPrimary: "#D4A843" } }} />
+          <UserButton appearance={{ variables: { colorPrimary: "#B14D2C" } }} />
         </div>
       </div>
     </header>

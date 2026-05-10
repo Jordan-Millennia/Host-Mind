@@ -22,12 +22,12 @@ export default async function AllRoomsPage({ searchParams }: { searchParams: Sea
 
   return (
     <main className="px-7 py-10 max-w-[1400px] mx-auto">
-      <div className="flex items-end justify-between pb-6 mb-6 border-b border-[color:var(--color-rule)]">
+      <div className="flex items-end justify-between pb-6 mb-6 border-b border-[color:var(--color-hairline)]">
         <div>
           <h1 className="font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight">
-            All Rooms <span className="italic text-[color:var(--color-muted)]">— full portfolio</span>
+            All Rooms <span className="italic text-[color:var(--color-ink-3)]">— full portfolio</span>
           </h1>
-          <p className="mt-2 text-sm text-[color:var(--color-muted)]">{total} rooms matching current filters</p>
+          <p className="mt-2 text-sm text-[color:var(--color-ink-3)]">{total} rooms matching current filters</p>
         </div>
         <ExportButton />
       </div>

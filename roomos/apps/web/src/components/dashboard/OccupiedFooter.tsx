@@ -12,13 +12,13 @@ export function OccupiedFooter({ count, total }: { count: number; total: number 
         <span className="font-[family-name:var(--font-display)] text-2xl font-bold tabular-nums">
           {count}
         </span>
-        <span className="text-xs text-[color:var(--color-muted)]">
+        <span className="text-xs text-[color:var(--color-ink-3)]">
           rooms · <span className="italic text-[color:var(--color-green)]">{pct}% portfolio occupancy</span>
         </span>
       </div>
       <Link
         href="/all-rooms?status=occupied"
-        className="text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--color-muted)] hover:text-[color:var(--color-ink-2)]"
+        className="text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--color-ink-3)] hover:text-[color:var(--color-ink-2)]"
       >
         Expand ↓
       </Link>

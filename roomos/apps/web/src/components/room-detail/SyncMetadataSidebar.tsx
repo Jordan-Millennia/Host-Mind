@@ -8,8 +8,8 @@ export function SyncMetadataSidebar({
   lastFinancialSyncAt: Date | null
 }) {
   return (
-    <div className="p-5 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)]">
-      <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)] mb-3">
+    <div className="p-5 rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)]">
+      <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-ink-3)] mb-3">
         Sync metadata
       </h3>
       <Row label="Last occupancy sync" value={lastSyncedAt ? formatDaysAgo(lastSyncedAt) : "—"} />
@@ -21,8 +21,8 @@ export function SyncMetadataSidebar({
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b last:border-b-0 border-[color:var(--color-rule)] text-xs">
-      <span className="text-[color:var(--color-muted)]">{label}</span>
+    <div className="flex items-center justify-between py-2 border-b last:border-b-0 border-[color:var(--color-hairline)] text-xs">
+      <span className="text-[color:var(--color-ink-3)]">{label}</span>
       <span className="font-semibold">{value}</span>
     </div>
   )

@@ -27,7 +27,7 @@ export function ExportButton() {
     <button
       onClick={download}
       disabled={pending}
-      className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)] hover:border-[color:var(--color-rule-hi)] disabled:opacity-50"
+      className="text-[10px] font-semibold uppercase tracking-[0.14em] px-3 py-[6px] rounded-md border border-[color:var(--color-hairline)] bg-[color:var(--color-paper)] hover:border-[color:var(--color-hairline-hi)] disabled:opacity-50"
     >
       {pending ? "Exporting…" : "Export CSV"}
     </button>

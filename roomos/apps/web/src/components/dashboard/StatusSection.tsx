@@ -29,14 +29,14 @@ export function StatusSection({
         >
           {meta.name}
         </h2>
-        <span className="text-[11px] font-medium text-[color:var(--color-muted)] px-2 py-[2px] rounded-full bg-[color:rgba(26,26,26,0.05)]">
+        <span className="text-[11px] font-medium text-[color:var(--color-ink-3)] px-2 py-[2px] rounded-full bg-[color:rgba(26,26,26,0.05)]">
           {totalCount}
         </span>
-        <span className="flex-1 h-px bg-[color:var(--color-rule)]" />
+        <span className="flex-1 h-px bg-[color:var(--color-hairline)]" />
         {totalCount > rooms.length && (
           <Link
             href={`/all-rooms?status=${meta.chipKey}`}
-            className="text-[11px] font-medium text-[color:var(--color-muted)] hover:text-[color:var(--color-coral-dark)]"
+            className="text-[11px] font-medium text-[color:var(--color-ink-3)] hover:text-[color:var(--color-coral-dark)]"
           >
             View all →
           </Link>

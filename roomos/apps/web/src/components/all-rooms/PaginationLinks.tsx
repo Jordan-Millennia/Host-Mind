@@ -26,23 +26,23 @@ export function PaginationLinks({
   const end = Math.min(page * pageSize, total)
 
   return (
-    <div className="flex items-center justify-between mt-4 text-xs text-[color:var(--color-muted)]">
+    <div className="flex items-center justify-between mt-4 text-xs text-[color:var(--color-ink-3)]">
       <span>Showing {start}–{end} of {total}</span>
       <div className="flex gap-2">
         {page > 1 ? (
-          <Link href={buildHref(page - 1)} className="px-3 py-1 rounded border border-[color:var(--color-rule)] hover:border-[color:var(--color-rule-hi)]">
+          <Link href={buildHref(page - 1)} className="px-3 py-1 rounded border border-[color:var(--color-hairline)] hover:border-[color:var(--color-hairline-hi)]">
             ← Previous
           </Link>
         ) : (
-          <span className="px-3 py-1 rounded border border-[color:var(--color-rule)] opacity-40">← Previous</span>
+          <span className="px-3 py-1 rounded border border-[color:var(--color-hairline)] opacity-40">← Previous</span>
         )}
         <span className="px-3 py-1 text-[color:var(--color-ink-2)]">Page {page} of {totalPages}</span>
         {page < totalPages ? (
-          <Link href={buildHref(page + 1)} className="px-3 py-1 rounded border border-[color:var(--color-rule)] hover:border-[color:var(--color-rule-hi)]">
+          <Link href={buildHref(page + 1)} className="px-3 py-1 rounded border border-[color:var(--color-hairline)] hover:border-[color:var(--color-hairline-hi)]">
             Next →
           </Link>
         ) : (
-          <span className="px-3 py-1 rounded border border-[color:var(--color-rule)] opacity-40">Next →</span>
+          <span className="px-3 py-1 rounded border border-[color:var(--color-hairline)] opacity-40">Next →</span>
         )}
       </div>
     </div>

@@ -22,14 +22,14 @@ export default async function TeamPage() {
   return (
     <div className="flex flex-col gap-9">
       <section>
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)] mb-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-ink-3)] mb-3">
           Team ({users.length})
         </h2>
         <TeamList users={users} currentUserId={ctx.teamUserId} />
       </section>
 
       <section>
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)] mb-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--color-ink-3)] mb-3">
           Invite a team member
         </h2>
         <InviteForm pending={pendingInvites} />
