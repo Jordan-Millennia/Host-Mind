@@ -50,6 +50,9 @@ jobs:
         run: pnpm lint
       - name: Unit tests
         run: pnpm test
+      - name: Deep-sweep fence tool tests
+        working-directory: .
+        run: node --test skills/padsplit-message-responder/bin/vault-fence.test.mjs
       - name: Migration drift check
         run: |
           # Prisma's `migrate diff --from-migrations` needs a shadow DB to

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, realpathSync } from "node:fs"
+import { readFileSync, writeFileSync, realpathSync, readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 const FM_RE = /^---\n([\s\S]*?)\n---\n?/
@@ -116,6 +116,42 @@ export function migrate(content, kind) {
   return out
 }
 
+export function buildRoster(dossiers) {
+  const rows = dossiers.map((d) => {
+    const f = d.frontmatter
+    return `| ${f.name ?? "?"} | ${f.room ?? "?"} | ${f.property ?? "(unlinked)"} | ${f.status ?? "?"} | ${f.balance ?? "?"} | ${f["payment-tier"] ?? "?"} |`
+  })
+  return `# CoHost Management — Member Roster
+
+**Last Updated:** ${new Date().toISOString().slice(0, 10)}
+**Total Members:** ${dossiers.length}
+**Source:** PadSplit deep-sweep reconciliation
+
+| Name | Room | Property | Status | Balance | Pay Tier |
+|------|------|----------|--------|---------|----------|
+${rows.join("\n")}
+`
+}
+
+export function buildPortfolio(properties) {
+  const totalRooms = properties.reduce((s, p) => s + Number(p.frontmatter.rooms || 0), 0)
+  const occ = properties.reduce((s, p) => s + (p.occupied || 0), 0)
+  const vac = properties.reduce((s, p) => s + (p.vacant || 0), 0)
+  return `# CoHost Management — Portfolio Rollup
+
+**Last full sweep:** ${new Date().toISOString()}
+
+- **Properties:** ${properties.length}
+- **Total rooms:** ${totalRooms}
+- **Occupied:** ${occ}
+- **Vacant:** ${vac}
+
+| Property | Rooms | Occupied | Vacant | Status |
+|----------|-------|----------|--------|--------|
+${properties.map((p) => `| ${p.frontmatter.address} | ${p.frontmatter.rooms} | ${p.occupied || 0} | ${p.vacant || 0} | ${p.frontmatter.status ?? "?"} |`).join("\n")}
+`
+}
+
 export function unifiedDiff(label, a, b) {
   if (a === b) return ""
   const al = a.split("\n"), bl = b.split("\n")
@@ -136,7 +172,7 @@ export function unifiedDiff(label, a, b) {
   return out.join("\n") + "\n"
 }
 
-function main(argv) {
+async function main(argv) {
   const [verb, file] = argv
   if (verb === "parse") {
     const parsed = parseVaultFile(readFileSync(file, "utf8"))
@@ -178,6 +214,39 @@ function main(argv) {
     if (next !== original) writeFileSync(file, next)
     return
   }
+  if (verb === "roster" || verb === "rollup") {
+    const vault = argv[argv.indexOf("--vault") + 1]
+    const outRel = argv[argv.indexOf("--out") + 1]
+    const dryRun = argv.includes("--dry-run")
+    const { join } = await import("node:path")
+    let nextContent
+    if (verb === "roster") {
+      const dir = join(vault, "members")
+      const files = readdirSync(dir).filter((n) => n.endsWith(".md") && !n.startsWith("_"))
+      const dossiers = files.map((n) => ({ frontmatter: parseVaultFile(readFileSync(join(dir, n), "utf8")).frontmatter }))
+      nextContent = buildRoster(dossiers)
+    } else {
+      const files = readdirSync(vault).filter((n) => n.endsWith(".md") && !n.startsWith("_"))
+      const properties = files.map((n) => {
+        const parsed = parseVaultFile(readFileSync(join(vault, n), "utf8"))
+        let occupied = 0, vacant = 0
+        const rb = parsed.regions.roster?.body ?? ""
+        for (const line of rb.split("\n")) {
+          if (!line.trim().startsWith("|")) continue
+          if (/\bOCCUPIED\b/i.test(line)) occupied++
+          else if (/\bVACANT\b/i.test(line)) vacant++
+        }
+        return { frontmatter: parsed.frontmatter, occupied, vacant }
+      })
+      nextContent = buildPortfolio(properties)
+    }
+    const outPath = join(vault, outRel)
+    let original = ""
+    try { original = readFileSync(outPath, "utf8") } catch {}
+    if (dryRun) { process.stdout.write(unifiedDiff(outPath, original, nextContent)); return }
+    if (nextContent !== original) writeFileSync(outPath, nextContent)
+    return
+  }
   process.stderr.write(`unknown verb: ${verb}\n`)
   process.exit(1)
 }
@@ -190,4 +259,4 @@ function invokedDirectly() {
     return false
   }
 }
-if (invokedDirectly()) main(process.argv.slice(2))
+if (invokedDirectly()) main(process.argv.slice(2)).catch((e) => { process.stderr.write(String(e) + "\n"); process.exit(1) })

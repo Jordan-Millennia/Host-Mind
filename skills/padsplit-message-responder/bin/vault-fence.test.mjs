@@ -3,6 +3,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import { parseVaultFile, replaceRegion, frontmatterSet, SWEEP_PROPERTY_KEYS, SWEEP_DOSSIER_KEYS, unifiedDiff } from "./vault-fence.mjs"
 import { migrate } from "./vault-fence.mjs"
+import { buildRoster, buildPortfolio } from "./vault-fence.mjs"
 import { readFileSync as _rfs } from "node:fs"
 import { fileURLToPath as _f2p } from "node:url"
 import { dirname as _dn, join as _jn } from "node:path"
@@ -198,4 +199,28 @@ test("migrate(dossier-legacy) === dossier-fenced fixture", () => {
 test("re-migrating the fenced fixtures is a no-op", () => {
   assert.equal(migrate(fx("property-fenced.md"), "property"), fx("property-fenced.md"))
   assert.equal(migrate(fx("dossier-fenced.md"), "dossier"), fx("dossier-fenced.md"))
+})
+
+const DOSSIERS = [
+  { frontmatter: { name: "A", room: "R1", property: "1311 Morgana Rd", status: "Active", balance: "0.00", "payment-tier": "CURRENT" } },
+  { frontmatter: { name: "B", room: "R2", property: "733 Tarpon Ave", status: "Terminated", balance: "-407.90", "payment-tier": "HIGH_RISK" } },
+]
+const PROPERTIES = [
+  { frontmatter: { address: "1311 Morgana Rd", rooms: "6", status: "ACTIVE" }, occupied: 4, vacant: 2 },
+  { frontmatter: { address: "733 Tarpon Ave", rooms: "6", status: "ACTIVE" }, occupied: 3, vacant: 3 },
+]
+
+test("buildRoster emits one table row per dossier with property linkage", () => {
+  const md = buildRoster(DOSSIERS)
+  assert.match(md, /\| A \| R1 \| 1311 Morgana Rd \| Active \|/)
+  assert.match(md, /\| B \| R2 \| 733 Tarpon Ave \| Terminated \|/)
+  assert.match(md, /\*\*Total Members:\*\* 2/)
+})
+
+test("buildPortfolio rolls up totals", () => {
+  const md = buildPortfolio(PROPERTIES)
+  assert.match(md, /Properties:\*\* 2/)
+  assert.match(md, /Total rooms:\*\* 12/)
+  assert.match(md, /Occupied:\*\* 7/)
+  assert.match(md, /Vacant:\*\* 5/)
 })
