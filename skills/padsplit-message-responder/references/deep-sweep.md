@@ -8,7 +8,7 @@
 
 Check these conditions at the start of every skill run, in order:
 
-**Dry-run flag:** Check whether `_RECONCILE-DRYRUN` exists at the vault root. If it does, set `DRY_RUN=true` for this run. Every `vault-fence.mjs` call throughout the sweep MUST include `--dry-run`. In dry-run mode write only the DRY RUN PREVIEW block described in §10 — no fence writes, no frontmatter writes, no roster or rollup files, no snapshot. Do NOT delete `_RECONCILE-NOW` or `_RECONCILE-DRYRUN` in dry-run mode.
+**Dry-run flag:** Check whether `_RECONCILE-DRYRUN` exists at the vault root. If it does, set `DRY_RUN=true` for this run. Every `vault-fence.mjs` call throughout the sweep MUST include `--dry-run`. In dry-run mode write only the DRY RUN PREVIEW block described in §11 — no fence writes, no frontmatter writes, no roster or rollup files, no snapshot. Do NOT delete `_RECONCILE-NOW` or `_RECONCILE-DRYRUN` in dry-run mode.
 
 **Trigger check:** A deep sweep runs when EITHER condition is true:
 
@@ -17,7 +17,7 @@ Check these conditions at the start of every skill run, in order:
 
 If neither condition is true, skip deep sweep for this run and proceed with normal reactive processing.
 
-**Resume check:** Before starting, check whether `_RECONCILE-STATE.md` exists at the vault root with an `incomplete` status. If it does, resume from the recorded cursor (see §5) rather than restarting from Stage 1.
+**Resume check:** Before starting, check whether `_RECONCILE-STATE.md` exists at the vault root with an `in-progress` status. If it does, resume from the recorded cursor (see §5) rather than restarting from Stage 1.
 
 ---
 
@@ -246,7 +246,7 @@ members-swept: <count>
 <list of files migrated on this run, or "none">
 ```
 
-For a dry-run, replace the diffs section with the unified diff preview (see §10). Do not write a `completed` timestamp or status `complete` for a dry-run.
+For a dry-run, replace the diffs section with the unified diff preview (see §11). Do not write a `completed` timestamp or status `complete` for a dry-run.
 
 ---
 
