@@ -45,6 +45,43 @@ export function replaceRegion(content, name, newBody) {
   return content.slice(0, region.start) + newBody + content.slice(region.end)
 }
 
+export const SWEEP_PROPERTY_KEYS = [
+  "padsplit-property-id", "address", "market", "state", "rooms", "status", "last-swept",
+]
+export const SWEEP_DOSSIER_KEYS = [
+  "member-id", "name", "status", "balance", "payment-tier", "days-past-due", "room",
+  "property", "move-in-date", "weekly-rate", "move-in-fee", "last-payment-date",
+  "last-payment-amount", "phone", "email", "rating", "last-swept",
+]
+
+function serializeValue(v) {
+  if (v === null) return "null"
+  if (/^-?\d+(\.\d+)?$/.test(String(v))) return String(v)
+  return `"${String(v).replace(/"/g, '\\"')}"`
+}
+
+export function frontmatterSet(content, updates, ownedKeys) {
+  for (const k of Object.keys(updates)) {
+    if (!ownedKeys.includes(k)) throw new Error(`'${k}' is not a sweep-owned key`)
+  }
+  const fmMatch = content.match(FM_RE)
+  if (!fmMatch) throw new Error("No YAML frontmatter block found")
+  const lines = fmMatch[1].split("\n")
+  const seen = new Set()
+  const outLines = lines.map((line) => {
+    const m = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/)
+    if (!m) return line
+    const key = m[1]
+    if (key in updates) { seen.add(key); return `${key}: ${serializeValue(updates[key])}` }
+    return line
+  })
+  for (const k of ownedKeys) {
+    if (k in updates && !seen.has(k)) outLines.push(`${k}: ${serializeValue(updates[k])}`)
+  }
+  const newFm = `---\n${outLines.join("\n")}\n---\n`
+  return newFm + content.slice(fmMatch[0].length)
+}
+
 function unifiedDiff() {
   return ""
 }
@@ -67,6 +104,17 @@ function main(argv) {
     const body = readFileSync(argv[bodyFileIdx + 1], "utf8")
     const original = readFileSync(file, "utf8")
     const next = replaceRegion(original, name, body)
+    if (dryRun) { process.stdout.write(unifiedDiff(file, original, next)); return }
+    if (next !== original) writeFileSync(file, next)
+    return
+  }
+  if (verb === "frontmatter-set") {
+    const kind = argv[argv.indexOf("--kind") + 1]
+    const json = argv[argv.indexOf("--json") + 1]
+    const dryRun = argv.includes("--dry-run")
+    const ownedKeys = kind === "dossier" ? SWEEP_DOSSIER_KEYS : SWEEP_PROPERTY_KEYS
+    const original = readFileSync(file, "utf8")
+    const next = frontmatterSet(original, JSON.parse(json), ownedKeys)
     if (dryRun) { process.stdout.write(unifiedDiff(file, original, next)); return }
     if (next !== original) writeFileSync(file, next)
     return
