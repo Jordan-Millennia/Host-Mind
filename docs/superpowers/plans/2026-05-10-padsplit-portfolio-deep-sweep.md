@@ -271,7 +271,8 @@ Expected: FAIL — module/exports missing.
 ```javascript
 // skills/padsplit-message-responder/bin/vault-fence.mjs
 #!/usr/bin/env node
-import { readFileSync } from "node:fs"
+import { readFileSync, realpathSync } from "node:fs"
+import { fileURLToPath } from "node:url"
 
 const FM_RE = /^---\n([\s\S]*?)\n---\n?/
 
@@ -324,7 +325,15 @@ function main(argv) {
   process.exit(1)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main(process.argv.slice(2))
+function invokedDirectly() {
+  if (!process.argv[1]) return false
+  try {
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1])
+  } catch {
+    return false
+  }
+}
+if (invokedDirectly()) main(process.argv.slice(2))
 ```
 
 - [ ] **Step 4: Run, verify pass**
