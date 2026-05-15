@@ -133,6 +133,34 @@ ${rows.join("\n")}
 `
 }
 
+const STATUS_ENUM = new Set(["OCCUPIED", "VACANT", "MOVING_IN", "MOVING_OUT", "NEEDS_FLIP", "INACTIVE"])
+
+/**
+ * Parse the body of a SWEEP:roster region and count room rows by status cell.
+ * A row is a "room row" if exactly one of its pipe-delimited cells, after
+ * trimming, matches a known status token exactly (case-insensitive).
+ * occupied = rows whose status cell is OCCUPIED; vacant = roomRows − occupied.
+ *
+ * @param {string} rosterBody — the raw body string between the SWEEP:roster fences
+ * @returns {{ occupied: number, vacant: number, roomRows: number }}
+ */
+export function countRoomsInRosterBody(rosterBody) {
+  let occupied = 0, roomRows = 0
+  for (const line of rosterBody.split("\n")) {
+    const trimmed = line.trim()
+    if (!trimmed.startsWith("|")) continue
+    // Split on pipe, trim each cell, drop the empty strings at position 0 and last
+    const cells = trimmed.split("|").slice(1, -1).map((c) => c.trim())
+    // A "status cell" is a cell whose entire trimmed content is exactly one of the known enum values
+    const matchingCells = cells.filter((c) => STATUS_ENUM.has(c.toUpperCase()))
+    // A "room row" has exactly one status cell (excludes header and separator rows automatically)
+    if (matchingCells.length !== 1) continue
+    roomRows++
+    if (matchingCells[0].toUpperCase() === "OCCUPIED") occupied++
+  }
+  return { occupied, vacant: roomRows - occupied, roomRows }
+}
+
 export function buildPortfolio(properties) {
   const totalRooms = properties.reduce((s, p) => s + Number(p.frontmatter.rooms || 0), 0)
   const occ = properties.reduce((s, p) => s + (p.occupied || 0), 0)
@@ -229,13 +257,8 @@ async function main(argv) {
       const files = readdirSync(vault).filter((n) => n.endsWith(".md") && !n.startsWith("_"))
       const properties = files.map((n) => {
         const parsed = parseVaultFile(readFileSync(join(vault, n), "utf8"))
-        let occupied = 0, vacant = 0
         const rb = parsed.regions.roster?.body ?? ""
-        for (const line of rb.split("\n")) {
-          if (!line.trim().startsWith("|")) continue
-          if (/\bOCCUPIED\b/i.test(line)) occupied++
-          else if (/\bVACANT\b/i.test(line)) vacant++
-        }
+        const { occupied, vacant } = countRoomsInRosterBody(rb)
         return { frontmatter: parsed.frontmatter, occupied, vacant }
       })
       nextContent = buildPortfolio(properties)

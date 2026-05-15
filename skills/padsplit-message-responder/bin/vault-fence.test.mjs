@@ -4,6 +4,7 @@ import assert from "node:assert/strict"
 import { parseVaultFile, replaceRegion, frontmatterSet, SWEEP_PROPERTY_KEYS, SWEEP_DOSSIER_KEYS, unifiedDiff } from "./vault-fence.mjs"
 import { migrate } from "./vault-fence.mjs"
 import { buildRoster, buildPortfolio } from "./vault-fence.mjs"
+import { countRoomsInRosterBody } from "./vault-fence.mjs"
 import { readFileSync as _rfs } from "node:fs"
 import { execFileSync } from "node:child_process"
 import { fileURLToPath as _f2p } from "node:url"
@@ -233,4 +234,27 @@ test("CLI: parse verb runs on a fixture", () => {
   const j = JSON.parse(out)
   assert.ok(j.hasFence)
   assert.ok("padsplit-property-id" in j.frontmatter)
+})
+
+test("countRoomsInRosterBody parses the status column, not substrings", () => {
+  const body = `
+| Room | Status | Weekly | Member | Balance |
+|------|--------|--------|--------|---------|
+| R1 | OCCUPIED | $205 | Jeffrey Byrd | $0 |
+| R2 | VACANT | $199 | — vacant — | $0 |
+| R3 | MOVING_IN | $210 | — vacant — | $0 |
+| R4 | NEEDS_FLIP | $200 | — vacant — | $0 |
+| R5 | INACTIVE | $0 | — vacant — | $0 |
+`
+  const r = countRoomsInRosterBody(body)
+  assert.equal(r.roomRows, 5)
+  assert.equal(r.occupied, 1)              // only R1
+  assert.equal(r.vacant, 4)                // R2..R5 — incl. MOVING_IN/NEEDS_FLIP/INACTIVE; the "— vacant —" member text does NOT inflate it
+})
+
+test("countRoomsInRosterBody returns 0/0 for a placeholder roster", () => {
+  const r = countRoomsInRosterBody("\n_(populated by deep sweep)_\n")
+  assert.equal(r.roomRows, 0)
+  assert.equal(r.occupied, 0)
+  assert.equal(r.vacant, 0)
 })

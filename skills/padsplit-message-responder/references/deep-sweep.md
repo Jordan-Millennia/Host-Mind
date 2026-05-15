@@ -8,7 +8,7 @@
 
 Check these conditions at the start of every skill run, in order:
 
-**Dry-run flag:** Check whether `_RECONCILE-DRYRUN` exists at the vault root. If it does, set `DRY_RUN=true` for this run. Every `vault-fence.mjs` call throughout the sweep MUST include `--dry-run`. In dry-run mode write only the DRY RUN PREVIEW block described in §11 — no fence writes, no frontmatter writes, no roster or rollup files, no snapshot. Do NOT delete `_RECONCILE-NOW` or `_RECONCILE-DRYRUN` in dry-run mode.
+**Dry-run flag:** Check whether `_RECONCILE-DRYRUN` exists at the vault root. If it does, set `DRY_RUN=true` for this run. Every `vault-fence.mjs` call throughout the sweep MUST include `--dry-run`. In dry-run mode write only the DRY RUN PREVIEW block described in §11 — no fence writes, no frontmatter writes, no roster or rollup files, no snapshot. Do NOT delete `_RECONCILE-NOW` or `_RECONCILE-DRYRUN` in dry-run mode. When `DRY_RUN=true`, skip normal inbox processing for this run and perform only the dry-run sweep preview — a dry-run is a test run and must not send any member/guest messages.
 
 **Trigger check:** A deep sweep runs when EITHER condition is true:
 
