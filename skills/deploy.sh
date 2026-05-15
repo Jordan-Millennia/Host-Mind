@@ -4,6 +4,8 @@
 set -euo pipefail
 SRC="$(cd "$(dirname "$0")/padsplit-message-responder" && pwd)"
 DEST="$HOME/.codex/skills/padsplit-message-responder"
+echo "Running vault-fence tests before deploy…"
+node --test "$SRC/bin/vault-fence.test.mjs"
 mkdir -p "$DEST"
 rsync -av --delete \
   --exclude '.DS_Store' \

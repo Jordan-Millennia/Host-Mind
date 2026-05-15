@@ -5,6 +5,7 @@ import { parseVaultFile, replaceRegion, frontmatterSet, SWEEP_PROPERTY_KEYS, SWE
 import { migrate } from "./vault-fence.mjs"
 import { buildRoster, buildPortfolio } from "./vault-fence.mjs"
 import { readFileSync as _rfs } from "node:fs"
+import { execFileSync } from "node:child_process"
 import { fileURLToPath as _f2p } from "node:url"
 import { dirname as _dn, join as _jn } from "node:path"
 const HERE = _dn(_f2p(import.meta.url))
@@ -223,4 +224,13 @@ test("buildPortfolio rolls up totals", () => {
   assert.match(md, /Total rooms:\*\* 12/)
   assert.match(md, /Occupied:\*\* 7/)
   assert.match(md, /Vacant:\*\* 5/)
+})
+
+test("CLI: parse verb runs on a fixture", () => {
+  const out = execFileSync("node", [
+    _jn(HERE, "vault-fence.mjs"), "parse", _jn(HERE, "fixtures", "property-fenced.md"),
+  ], { encoding: "utf8" })
+  const j = JSON.parse(out)
+  assert.ok(j.hasFence)
+  assert.ok("padsplit-property-id" in j.frontmatter)
 })
