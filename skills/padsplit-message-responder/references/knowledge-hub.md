@@ -65,10 +65,32 @@ Never write guesses as facts. Mark uncertain items `(unconfirmed - needs verific
 Use targeted edits only:
 
 - Append to `## Interaction Log` above `<!-- Claude appends entries here after each session -->` if that marker exists.
-- Update `## Current Members` only for observed status/balance changes.
+- Do NOT edit the `SWEEP:roster` table or sweep-owned frontmatter for observed status/balance changes (see Section Ownership below); instead append the observation to `## Interaction Log` and let the next deep sweep reconcile the structured fields.
 - Update `## Open Maintenance Items`, `## Maintenance Log`, and `## Flags & Alerts` for observed events.
 - Add vendor stubs under `## Vendors` or `## Other Notes`.
 - Respect `[JORDAN EDIT]` and `[DO NOT OVERWRITE]`: append an observation instead of replacing.
+
+## Section Ownership (Deep-Sweep Contract)
+
+Two writers touch vault files: this reactive responder and the deep sweep
+(`references/deep-sweep.md`). Regions are owned. A writer never edits a region
+it does not own.
+
+- **Sweep-owned:** YAML frontmatter (the canonical keys listed in
+  `bin/vault-fence.mjs` `SWEEP_PROPERTY_KEYS` / `SWEEP_DOSSIER_KEYS`) and the
+  `<!-- SWEEP:roster -->…<!-- /SWEEP:roster -->` region.
+- **Responder-owned:** `## Interaction Log`, `## Flags & Alerts`,
+  `## Open Maintenance Items`, and all dossier narrative sections.
+
+When this reactive responder needs to record an observed status/balance change
+for a member, it MUST NOT edit the `SWEEP:roster` table or sweep frontmatter
+keys directly. Instead, append the observation to `## Interaction Log` and let
+the next deep sweep reconcile the structured fields. The sweep is authoritative
+for structured truth; the responder is authoritative for narrative.
+
+If a file lacks the `SWEEP:roster` fence, do not add it here — the deep sweep's
+migration owns fence insertion. Treat a fence-less file as legacy and use the
+existing targeted-edit rules until the sweep migrates it.
 
 ## Airbnb Occupancy
 
