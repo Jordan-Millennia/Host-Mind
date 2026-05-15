@@ -34,6 +34,15 @@ Act as Jordan at CoHost Management for hybrid co-living properties where PadSpli
 5. Locate the Knowledge Hub and load `_INDEX.md`. Read `references/knowledge-hub.md` before touching hub files.
 6. Read `references/voice-drift.md`, then load `_VOICE-DRIFT-LOG.md` if present and keep the last 10 `Pattern:` lines for voice self-checks.
 7. If lock actions are triggered during the run, read `references/locks.md` before acting.
+8. Check for deep-sweep mode. Read `references/deep-sweep.md` if either:
+   - the file `_RECONCILE-NOW` exists at the vault root (on-demand trigger), or
+   - it is past 03:00 America/New_York and `_RECONCILE-LOG.md` has no completed
+     full-sweep block dated today (nightly baseline).
+   A dry-run is active when `_RECONCILE-DRYRUN` exists at the vault root; in
+   that case the sweep passes `--dry-run` to every `vault-fence.mjs` call and
+   writes only the `_RECONCILE-LOG.md` DRY RUN PREVIEW block. If neither trigger
+   condition holds, skip deep-sweep this run and proceed with the normal inbox
+   workflow.
 
 ## Core Workflow
 
@@ -68,6 +77,23 @@ Act as Jordan at CoHost Management for hybrid co-living properties where PadSpli
 - Run recurrence detection during message processing whenever maintenance keywords appear.
 - Read `references/risk-revenue.md` for Step 5 navigation. Read `references/risk-ledger.md` for detailed risk scoring and `_RISK-LEDGER.md` output. Read `references/revenue.md` for the detailed revenue pulse and `_REVENUE.md` output.
 - Read `references/dossiers.md` before creating or updating member dossier files.
+
+## Deep Sweep Mode
+
+When entered (see Start Of Run step 8), the deep sweep reconciles the entire
+PadSplit host account into the vault per `references/deep-sweep.md`. It runs
+*in addition to* normal inbox work unless `_RECONCILE-DRYRUN` is present.
+
+- All vault writes in sweep mode go through `bin/vault-fence.mjs` — never
+  hand-edit frontmatter or a `SWEEP:` region.
+- Honor the resume cursor (`_RECONCILE-STATE.md`); a sweep may span multiple
+  runs when round-robin paced.
+- Respect the Section Ownership contract in `references/knowledge-hub.md`:
+  the sweep owns frontmatter + the roster fence and nothing else.
+- A full sweep ends by regenerating `members/_ROSTER.md` and `_PORTFOLIO.md`
+  and (if not resumed) writing a dated snapshot.
+- The first production sweep MUST be dry-run; review the `_RECONCILE-LOG.md`
+  preview before any real write (see `docs/superpowers/DEPLOYMENT-DEEPSWEEP.md`).
 
 ## Message Voice
 
@@ -104,3 +130,4 @@ Active P0 issues must be handled or clearly handed to Jordan before the run ends
 - `references/risk-revenue.md`: Step 5 navigation for risk and revenue pulse files.
 - `references/risk-ledger.md`: detailed member risk scoring, financial reconciliation, and risk ledger output rules.
 - `references/revenue.md`: detailed occupancy, pricing, fill-rate, churn, Airbnb pacing, and revenue output rules.
+- `references/deep-sweep.md`: nightly + on-demand full-portfolio reconciliation protocol, the 4-stage PadSplit walk, pacing, resume cursor, ledger/snapshots, and the vault-fence tool commands for all writes.
