@@ -2,6 +2,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import { parseVaultFile, replaceRegion, frontmatterSet, SWEEP_PROPERTY_KEYS, SWEEP_DOSSIER_KEYS, unifiedDiff } from "./vault-fence.mjs"
+import { migrate } from "./vault-fence.mjs"
 
 const SAMPLE = `---
 address: "1311 Morgana Rd, Jacksonville, FL 32205"
@@ -130,4 +131,55 @@ test("unifiedDiff shows only changed lines and writes nothing", () => {
 
 test("unifiedDiff is empty string when identical", () => {
   assert.equal(unifiedDiff("f.md", "same\n", "same\n"), "")
+})
+
+const LEGACY_PROPERTY = `---
+address: "733 Tarpon Ave, Sarasota, FL 34237"
+rooms: 6
+platform: "PadSplit"
+---
+
+# 733 Tarpon Ave
+
+## Current Members
+
+| Room | Name | Status | Balance Due | Notes |
+|------|------|--------|-------------|-------|
+| R1 | Jeffrey Byrd | Active | $0 | |
+
+## Interaction Log
+
+- 2026-05-01: existing note KEEP
+`
+
+test("migrate inserts a roster fence wrapping the existing Current Members table", () => {
+  const out = migrate(LEGACY_PROPERTY, "property")
+  assert.match(out, /<!-- SWEEP:roster -->/)
+  assert.match(out, /<!-- \/SWEEP:roster -->/)
+  const r = parseVaultFile(out).regions.roster
+  assert.match(r.body, /Jeffrey Byrd/)
+  assert.match(out, /existing note KEEP/)
+})
+
+test("migrate adds canonical frontmatter keys (null where unknown)", () => {
+  const out = migrate(LEGACY_PROPERTY, "property")
+  const fm = parseVaultFile(out).frontmatter
+  assert.ok("padsplit-property-id" in fm)
+  assert.ok("status" in fm)
+  assert.ok("last-swept" in fm)
+})
+
+test("migrate is detect-and-skip: second run is byte-identical", () => {
+  const once = migrate(LEGACY_PROPERTY, "property")
+  const twice = migrate(once, "property")
+  assert.equal(once, twice)
+})
+
+test("migrate on a dossier inserts canonical dossier keys incl. property", () => {
+  const legacyDossier = `---\nname: "Abhay Azariah"\nbalance: "0.00"\nproperty: null\n---\n\n# Dossier\n`
+  const out = migrate(legacyDossier, "dossier")
+  const fm = parseVaultFile(out).frontmatter
+  assert.ok("member-id" in fm)
+  assert.ok("days-past-due" in fm)
+  assert.equal(fm.property, null)
 })

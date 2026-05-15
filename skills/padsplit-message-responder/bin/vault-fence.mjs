@@ -82,6 +82,40 @@ export function frontmatterSet(content, updates, ownedKeys) {
   return newFm + content.slice(fmMatch[0].length)
 }
 
+const CURRENT_MEMBERS_HEADING_RE = /^##\s+Current Members\s*$/m
+
+export function migrate(content, kind) {
+  let out = content
+  const parsed = parseVaultFile(out)
+
+  // 1. Fence (property files only — dossiers have no roster table).
+  if (kind === "property" && !parsed.regions.roster) {
+    const h = out.match(CURRENT_MEMBERS_HEADING_RE)
+    if (h) {
+      const afterHeading = h.index + h[0].length
+      const rest = out.slice(afterHeading)
+      const stop = rest.search(/\n##\s|\n---/)
+      const tableBlock = stop === -1 ? rest : rest.slice(0, stop)
+      const tail = stop === -1 ? "" : rest.slice(stop)
+      out =
+        out.slice(0, afterHeading) +
+        `\n\n<!-- SWEEP:roster -->` + tableBlock + `\n<!-- /SWEEP:roster -->` + tail
+    } else {
+      const fm = out.match(FM_RE)[0]
+      out = fm + `\n<!-- SWEEP:roster -->\n_(populated by deep sweep)_\n<!-- /SWEEP:roster -->\n` + out.slice(fm.length)
+    }
+  }
+
+  // 2. Canonical frontmatter keys (null where unknown). Never overwrite existing values.
+  const ownedKeys = kind === "property" ? SWEEP_PROPERTY_KEYS : SWEEP_DOSSIER_KEYS
+  const fmNow = parseVaultFile(out).frontmatter
+  const additions = {}
+  for (const k of ownedKeys) if (!(k in fmNow)) additions[k] = null
+  if (Object.keys(additions).length > 0) out = frontmatterSet(out, additions, ownedKeys)
+
+  return out
+}
+
 export function unifiedDiff(label, a, b) {
   if (a === b) return ""
   const al = a.split("\n"), bl = b.split("\n")
@@ -131,6 +165,15 @@ function main(argv) {
     const ownedKeys = kind === "dossier" ? SWEEP_DOSSIER_KEYS : SWEEP_PROPERTY_KEYS
     const original = readFileSync(file, "utf8")
     const next = frontmatterSet(original, JSON.parse(json), ownedKeys)
+    if (dryRun) { process.stdout.write(unifiedDiff(file, original, next)); return }
+    if (next !== original) writeFileSync(file, next)
+    return
+  }
+  if (verb === "migrate") {
+    const kind = argv[argv.indexOf("--kind") + 1]
+    const dryRun = argv.includes("--dry-run")
+    const original = readFileSync(file, "utf8")
+    const next = migrate(original, kind)
     if (dryRun) { process.stdout.write(unifiedDiff(file, original, next)); return }
     if (next !== original) writeFileSync(file, next)
     return
