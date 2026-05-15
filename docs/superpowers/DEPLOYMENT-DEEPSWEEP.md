@@ -42,6 +42,19 @@ On the Mac Studio, with the skill deployed:
 2. The next run performs the real first sweep: the one-time idempotent migration of all property files + dossiers (insert `<!-- SWEEP:roster -->` fence + canonical frontmatter keys), then full reconciliation, then regenerates `members/_ROSTER.md` + `_PORTFOLIO.md`, then writes a dated `_SNAPSHOT-YYYY-MM-DD/`. Expect 1–2 h, round-robin paced; it may span multiple normal runs via the `_RECONCILE-STATE.md` resume cursor.
 3. The skill deletes `_RECONCILE-NOW` only when the full sweep completes. Until then, re-runs resume from the cursor.
 
-## 4. Smoke test
+## 4. Smoke test (after the first real sweep)
 
-(Filled in by Task 15.)
+1. `members/_ROSTER.md` — header `**Last Updated:**` is today's date; member count is plausible vs PadSplit `/host/members`.
+2. `_PORTFOLIO.md` — property / total-rooms / occupied / vacant totals are plausible vs PadSplit `/host/listings`.
+3. Spot-check 3 properties (one fully occupied, one with vacant rooms, one onboarding): the `<!-- SWEEP:roster -->` table lists every room incl. vacant; `## Interaction Log` is byte-identical to a pre-sweep snapshot copy (`diff` a `_SNAPSHOT-*/` copy against the live file — only frontmatter + the roster fence should differ).
+4. Spot-check 3 dossiers (one current, one past-due, one terminated): `property` is no longer `null`; `balance`, `payment-tier`, `days-past-due` populated.
+5. Within ≤15 min the RoomOS dashboard (`/properties`) reflects the fuller portfolio with ZERO RoomOS code change — the Phase 2A vault→Postgres adapter picked it up automatically.
+6. `_RECONCILE-LOG.md` last block: status complete; skipped pages = 0 (or each explained); diffs sane (no responder-owned region in any diff).
+7. Sanity SQL against the RoomOS DB the adapter feeds:
+   ```sql
+   SELECT count(*) FROM properties WHERE padsplit_property_id IS NOT NULL;
+   SELECT count(*) FROM members WHERE member_dossier_path IS NOT NULL;
+   ```
+   Both counts should rise after the sweep vs the pre-sweep baseline.
+
+If any check fails, the dry-run preview in `_RECONCILE-LOG.md` from step §2 is the diagnostic of record — compare it to what actually landed.
