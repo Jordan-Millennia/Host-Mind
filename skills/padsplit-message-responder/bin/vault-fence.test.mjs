@@ -1,7 +1,7 @@
 // skills/padsplit-message-responder/bin/vault-fence.test.mjs
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { parseVaultFile, replaceRegion, frontmatterSet, SWEEP_PROPERTY_KEYS, SWEEP_DOSSIER_KEYS } from "./vault-fence.mjs"
+import { parseVaultFile, replaceRegion, frontmatterSet, SWEEP_PROPERTY_KEYS, SWEEP_DOSSIER_KEYS, unifiedDiff } from "./vault-fence.mjs"
 
 const SAMPLE = `---
 address: "1311 Morgana Rd, Jacksonville, FL 32205"
@@ -117,4 +117,17 @@ test("frontmatterSet is idempotent", () => {
   const a = frontmatterSet(FM, { rooms: "6" }, SWEEP_PROPERTY_KEYS)
   const b = frontmatterSet(a, { rooms: "6" }, SWEEP_PROPERTY_KEYS)
   assert.equal(a, b)
+})
+
+test("unifiedDiff shows only changed lines and writes nothing", () => {
+  const a = "line1\nOLD\nline3\n"
+  const b = "line1\nNEW\nline3\n"
+  const d = unifiedDiff("f.md", a, b)
+  assert.match(d, /-OLD/)
+  assert.match(d, /\+NEW/)
+  assert.doesNotMatch(d, /line1.*\n.*line1/)
+})
+
+test("unifiedDiff is empty string when identical", () => {
+  assert.equal(unifiedDiff("f.md", "same\n", "same\n"), "")
 })

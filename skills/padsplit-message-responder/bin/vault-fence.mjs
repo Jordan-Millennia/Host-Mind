@@ -82,8 +82,24 @@ export function frontmatterSet(content, updates, ownedKeys) {
   return newFm + content.slice(fmMatch[0].length)
 }
 
-function unifiedDiff() {
-  return ""
+export function unifiedDiff(label, a, b) {
+  if (a === b) return ""
+  const al = a.split("\n"), bl = b.split("\n")
+  const n = al.length, m = bl.length
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0))
+  for (let i = n - 1; i >= 0; i--)
+    for (let j = m - 1; j >= 0; j--)
+      dp[i][j] = al[i] === bl[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1])
+  const out = [`--- ${label}`, `+++ ${label} (proposed)`]
+  let i = 0, j = 0
+  while (i < n && j < m) {
+    if (al[i] === bl[j]) { out.push(` ${al[i]}`); i++; j++ }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) { out.push(`-${al[i]}`); i++ }
+    else { out.push(`+${bl[j]}`); j++ }
+  }
+  while (i < n) out.push(`-${al[i++]}`)
+  while (j < m) out.push(`+${bl[j++]}`)
+  return out.join("\n") + "\n"
 }
 
 function main(argv) {
