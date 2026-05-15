@@ -8,6 +8,7 @@ mkdir -p "$DEST"
 rsync -av --delete \
   --exclude '.DS_Store' \
   --exclude 'bin/fixtures/' \
+  --exclude 'references/lock-cooldown.txt' \
   "$SRC"/ "$DEST"/
 echo "Deployed skill → $DEST"
 ls "$DEST/bin/vault-fence.mjs" >/dev/null && echo "vault-fence.mjs present ✓"

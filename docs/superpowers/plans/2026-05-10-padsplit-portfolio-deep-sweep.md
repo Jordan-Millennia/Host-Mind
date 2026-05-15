@@ -43,7 +43,7 @@
 <repo root>/
 ├── skills/
 │   ├── deploy.sh                                          # NEW (Task 2) — rsync repo copy → ~/.codex/skills
-│   └── padsplit-message-responder/                        # NEW (Task 2) — one-time import of the live skill
+│   └── padsplit-message-responder/                        # NEW (Task 2) — one-time import of the live skill (git tracks whole dir)
 │       ├── SKILL.md                                       # MODIFIED (Task 12) — sweep-mode trigger + section
 │       ├── references/
 │       │   ├── knowledge-hub.md                           # MODIFIED (Task 11) — fence-ownership contract
@@ -142,7 +142,6 @@ git commit -m "docs(deepsweep): start deployment doc"
 **Files:**
 - Create: `skills/padsplit-message-responder/**` (copied from live skill)
 - Create: `skills/deploy.sh`
-- Create: `skills/.gitignore` (exclude nothing — we want the whole skill tracked; this file documents that intent)
 
 - [ ] **Step 1: Import the live skill verbatim**
 
@@ -168,6 +167,7 @@ mkdir -p "$DEST"
 rsync -av --delete \
   --exclude '.DS_Store' \
   --exclude 'bin/fixtures/' \
+  --exclude 'references/lock-cooldown.txt' \
   "$SRC"/ "$DEST"/
 echo "Deployed skill → $DEST"
 ls "$DEST/bin/vault-fence.mjs" >/dev/null && echo "vault-fence.mjs present ✓"
@@ -1055,7 +1055,7 @@ echo "Running vault-fence tests before deploy…"
 node --test "$SRC/bin/vault-fence.test.mjs"
 ```
 
-Place this immediately after `set -euo pipefail` and the `SRC`/`DEST` resolution, before `rsync`. `set -e` aborts the deploy if tests fail.
+Place this immediately after `set -euo pipefail` and the `SRC`/`DEST` resolution, before `rsync`. `set -e` aborts the deploy if tests fail. Preserve the existing `--exclude` lines in the rsync block, including `--exclude 'references/lock-cooldown.txt'`.
 
 - [ ] **Step 2: Add a CLI smoke test asserting every verb is reachable**
 
