@@ -3,6 +3,11 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import { parseVaultFile, replaceRegion, frontmatterSet, SWEEP_PROPERTY_KEYS, SWEEP_DOSSIER_KEYS, unifiedDiff } from "./vault-fence.mjs"
 import { migrate } from "./vault-fence.mjs"
+import { readFileSync as _rfs } from "node:fs"
+import { fileURLToPath as _f2p } from "node:url"
+import { dirname as _dn, join as _jn } from "node:path"
+const HERE = _dn(_f2p(import.meta.url))
+const fx = (n) => _rfs(_jn(HERE, "fixtures", n), "utf8")
 
 const SAMPLE = `---
 address: "1311 Morgana Rd, Jacksonville, FL 32205"
@@ -182,4 +187,15 @@ test("migrate on a dossier inserts canonical dossier keys incl. property", () =>
   assert.ok("member-id" in fm)
   assert.ok("days-past-due" in fm)
   assert.equal(fm.property, null)
+})
+
+test("migrate(property-legacy) === property-fenced fixture", () => {
+  assert.equal(migrate(fx("property-legacy.md"), "property"), fx("property-fenced.md"))
+})
+test("migrate(dossier-legacy) === dossier-fenced fixture", () => {
+  assert.equal(migrate(fx("dossier-legacy.md"), "dossier"), fx("dossier-fenced.md"))
+})
+test("re-migrating the fenced fixtures is a no-op", () => {
+  assert.equal(migrate(fx("property-fenced.md"), "property"), fx("property-fenced.md"))
+  assert.equal(migrate(fx("dossier-fenced.md"), "dossier"), fx("dossier-fenced.md"))
 })
