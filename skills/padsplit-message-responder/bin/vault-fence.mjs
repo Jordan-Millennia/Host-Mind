@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, realpathSync } from "node:fs"
+import { readFileSync, writeFileSync, realpathSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 const FM_RE = /^---\n([\s\S]*?)\n---\n?/
@@ -38,6 +38,17 @@ export function parseVaultFile(content) {
   return { frontmatter, regions, hasFence, fmEnd, raw: content }
 }
 
+export function replaceRegion(content, name, newBody) {
+  const parsed = parseVaultFile(content)
+  const region = parsed.regions[name]
+  if (!region) throw new Error(`region '${name}' not found`)
+  return content.slice(0, region.start) + newBody + content.slice(region.end)
+}
+
+function unifiedDiff() {
+  return ""
+}
+
 function main(argv) {
   const [verb, file] = argv
   if (verb === "parse") {
@@ -47,6 +58,17 @@ function main(argv) {
       regions: Object.fromEntries(Object.entries(parsed.regions).map(([k, v]) => [k, { start: v.start, end: v.end }])),
       hasFence: parsed.hasFence,
     }, null, 2) + "\n")
+    return
+  }
+  if (verb === "replace-region") {
+    const name = argv[2]
+    const bodyFileIdx = argv.indexOf("--body-file")
+    const dryRun = argv.includes("--dry-run")
+    const body = readFileSync(argv[bodyFileIdx + 1], "utf8")
+    const original = readFileSync(file, "utf8")
+    const next = replaceRegion(original, name, body)
+    if (dryRun) { process.stdout.write(unifiedDiff(file, original, next)); return }
+    if (next !== original) writeFileSync(file, next)
     return
   }
   process.stderr.write(`unknown verb: ${verb}\n`)
