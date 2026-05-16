@@ -1,0 +1,4 @@
+interface:
+  display_name: "PadSplit Message Responder"
+  short_description: "Respond to PadSplit and Airbnb inboxes."
+  default_prompt: "Use $padsplit-message-responder to check PadSplit and Airbnb inboxes, respond as Jordan, take follow-up actions, handle lock tasks, and update the CoHost Knowledge Hub."
