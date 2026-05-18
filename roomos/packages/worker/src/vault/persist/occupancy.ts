@@ -3,10 +3,15 @@ import type { OccupancyStatus } from "@roomos/db"
 
 export function mapStatusText(text: string): OccupancyStatus | null {
   switch (text) {
+    // legacy "## Current Members" vocabulary
     case "Active":      return "OCCUPIED"
-    case "VACATED":
-    case "Vacant":      return "VACANT"
+    case "VACATED":     return "VACANT"
     case "TERMINATED":  return "INACTIVE"
+    // deep-sweep SWEEP:roster vocabulary
+    case "Occupied":    return "OCCUPIED"
+    case "Vacant":      return "VACANT"
+    case "Needs flip":  return "VACANT"   // between tenants — no current occupant
+    // shared
     case "Moving in":   return "MOVING_IN"
     case "Moving out":  return "MOVING_OUT"
     case "Inactive":    return "INACTIVE"

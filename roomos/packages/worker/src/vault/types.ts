@@ -3,12 +3,17 @@
 export type VaultFlagSeverity = "DANGER" | "WARN" | "INFO" | "OK"
 
 export type VaultMemberStatusText =
+  // legacy "## Current Members" vocabulary
   | "Active"
   | "VACATED"
   | "TERMINATED"
   | "Moving in"
   | "Moving out"
   | "Inactive"
+  // deep-sweep SWEEP:roster vocabulary
+  | "Occupied"
+  | "Vacant"
+  | "Needs flip"
 
 export type VaultMemberRow = {
   roomNumber: string                  // "R1", "R2", ...
