@@ -1,94 +1,80 @@
 import type { VaultMemberRow, VaultMemberStatusText } from "../types"
 
-const STATUS_VALUES: VaultMemberStatusText[] = [
-  // legacy "## Current Members" vocabulary
-  "Active",
-  "VACATED",
-  "TERMINATED",
-  "Moving in",
-  "Moving out",
-  "Inactive",
-  // deep-sweep SWEEP:roster vocabulary
-  "Occupied",
-  "Vacant",
-  "Needs flip",
-]
+// Member-cell vacancy / stub placeholders. A row whose member cell matches
+// has no occupant, so it is skipped (the member/occupancy pipeline must
+// never receive an empty-name member — preserves the Phase-2A contract).
+const NO_MEMBER = /^(—\s*vacant\s*—|-\s*vacant\s*-|vacant|—|-|_stub_|tbd|)$/i
 
-// Member-cell vacancy placeholders used by the deep-sweep roster.
-const VACANT_MEMBER = /^(—\s*vacant\s*—|-\s*vacant\s*-|vacant|—|-|)$/i
-
+/**
+ * Parse the property roster, whichever of the three known schemas it is in:
+ *   - legacy   "## Current Members": | Room | Name   | Status | Balance Due | Notes |
+ *   - sweep v1 SWEEP:roster fence:   | Room | Status | Rate   | Member |
+ *   - sweep v2 SWEEP:roster fence:   | Room | Status | Weekly Rate | Member | Balance |
+ *
+ * Header-driven: columns are located by NAME, not fixed position, so the
+ * parser survives roster-schema drift. Status text is passed through
+ * verbatim — vocabulary validation belongs to persist (mapStatusText), so a
+ * new status value can never again silently drop every row.
+ */
 export function parseMembersTable(content: string): VaultMemberRow[] {
-  // Post-deep-sweep: the roster is the sweep-owned region between
-  // <!-- SWEEP:roster --> … <!-- /SWEEP:roster -->, columns:
-  // | Room | Status | Rate | Member |. Prefer it when present.
   const fence = content.match(
     /<!--\s*SWEEP:roster\s*-->([\s\S]*?)<!--\s*\/SWEEP:roster\s*-->/,
   )
-  if (fence) return parseSweptRoster(fence[1]!)
-  // Legacy fallback: "## Current Members" table,
-  // columns | Room | Name | Status | Balance Due | Notes |.
-  return parseLegacyMembers(content)
-}
+  let table: string
+  if (fence) {
+    table = fence[1]!
+  } else {
+    const section = content.match(
+      /##\s+Current Members\s*\n([\s\S]*?)(?=\n##\s+|\n---|\n*$)/,
+    )
+    if (!section) return []
+    table = section[1]!
+  }
 
-function parseSweptRoster(body: string): VaultMemberRow[] {
-  const tableLines = body
+  const lines = table
     .split("\n")
     .map((l) => l.trim())
     .filter((l) => l.startsWith("|"))
-  if (tableLines.length < 3) return []
+  if (lines.length < 3) return []
+
+  const header = splitRow(lines[0]!).map((h) => h.toLowerCase())
+  const roomIdx = header.findIndex((h) => /^room$/.test(h))
+  const statusIdx = header.findIndex((h) => /^status$/.test(h))
+  const memberIdx = header.findIndex((h) => /^(member|name)$/.test(h))
+  const balanceIdx = header.findIndex((h) => /^balance(\s*due)?$/.test(h))
+  // Unknown schema (no Room or no member column) → nothing to extract.
+  if (roomIdx === -1 || memberIdx === -1) return []
+
   const rows: VaultMemberRow[] = []
-  for (const line of tableLines.slice(2)) {
-    // ["", room, status, rate, member, ""]
-    const cells = line.split("|").map((c) => c.trim())
-    if (cells.length < 6) continue
-    const [, roomRaw, statusRaw, , memberRaw] = cells
-    if (!roomRaw) continue
-    const status = stripBold(statusRaw ?? "")
-    if (!STATUS_VALUES.includes(status as VaultMemberStatusText)) continue
-    const member = (memberRaw ?? "").trim()
-    const name = VACANT_MEMBER.test(member) ? "" : member
-    // No member in the room → nothing to upsert into the member/occupancy
-    // pipeline. Skip, exactly like the legacy parser's `if (!name) continue`.
-    if (!name) continue
+  for (const line of lines.slice(2)) {
+    const cells = splitRow(line)
+    const roomRaw = cells[roomIdx] ?? ""
+    const memberRaw = (cells[memberIdx] ?? "").trim()
+    if (!roomRaw || NO_MEMBER.test(memberRaw)) continue
+    const status =
+      statusIdx >= 0 ? stripBold(cells[statusIdx] ?? "") : ""
+    const balanceRaw =
+      balanceIdx >= 0 ? (cells[balanceIdx] ?? "").trim() : ""
+    const balanceText = balanceRaw === "—" || balanceRaw === "-" ? "" : balanceRaw
     rows.push({
       roomNumber: normalizeRoom(roomRaw),
-      name,
+      name: memberRaw,
       status: status as VaultMemberStatusText,
-      // The sweep roster carries no per-room balance; dossier sync owns it.
-      balanceText: "",
+      balanceText,
       notes: "",
     })
   }
   return rows
 }
 
-function parseLegacyMembers(content: string): VaultMemberRow[] {
-  const sectionMatch = content.match(
-    /##\s+Current Members\s*\n([\s\S]*?)(?=\n##\s+|\n---|\n*$)/,
-  )
-  if (!sectionMatch) return []
-  const tableLines = sectionMatch[1]!
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.startsWith("|"))
-  if (tableLines.length < 3) return []
-  const rows: VaultMemberRow[] = []
-  for (const line of tableLines.slice(2)) {
-    const cells = line.split("|").map((c) => c.trim())
-    if (cells.length < 6) continue
-    const [, roomNumber, name, statusRaw, balanceText, notes] = cells
-    if (!roomNumber || !name) continue
-    const status = stripBold(statusRaw ?? "")
-    if (!STATUS_VALUES.includes(status as VaultMemberStatusText)) continue
-    rows.push({
-      roomNumber: roomNumber.toUpperCase(),
-      name,
-      status: status as VaultMemberStatusText,
-      balanceText: balanceText || "$0",
-      notes: notes ?? "",
-    })
-  }
-  return rows
+// Split a markdown table row into cells, trimming each and dropping ONLY the
+// empty cells produced by the bracketing leading/trailing "|". Internal empty
+// cells are preserved so positional column indices stay aligned.
+function splitRow(line: string): string[] {
+  const parts = line.split("|").map((c) => c.trim())
+  if (parts.length && parts[0] === "") parts.shift()
+  if (parts.length && parts[parts.length - 1] === "") parts.pop()
+  return parts
 }
 
 function normalizeRoom(s: string): string {
