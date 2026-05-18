@@ -2,13 +2,12 @@
 
 export type VaultFlagSeverity = "DANGER" | "WARN" | "INFO" | "OK"
 
-export type VaultMemberStatusText =
-  | "Active"
-  | "VACATED"
-  | "TERMINATED"
-  | "Moving in"
-  | "Moving out"
-  | "Inactive"
+// Raw roster status text, passed through verbatim by the parser. The roster
+// schema and PadSplit's status vocabulary drift over time (legacy
+// Active/VACATED, sweep v1 Occupied/Vacant, converged ACTIVE/BEHIND/…), so
+// the parser does NOT constrain this — mapStatusText() in persist/occupancy
+// is the single validation point.
+export type VaultMemberStatusText = string
 
 export type VaultMemberRow = {
   roomNumber: string                  // "R1", "R2", ...

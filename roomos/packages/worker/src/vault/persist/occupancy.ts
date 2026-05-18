@@ -2,14 +2,25 @@ import { prisma } from "@roomos/db"
 import type { OccupancyStatus } from "@roomos/db"
 
 export function mapStatusText(text: string): OccupancyStatus | null {
-  switch (text) {
-    case "Active":      return "OCCUPIED"
-    case "VACATED":
-    case "Vacant":      return "VACANT"
+  switch (text.trim().toUpperCase()) {
+    // legacy "## Current Members" vocabulary
+    case "ACTIVE":      return "OCCUPIED"   // also the converged PadSplit "ACTIVE"
+    case "VACATED":     return "VACANT"
     case "TERMINATED":  return "INACTIVE"
-    case "Moving in":   return "MOVING_IN"
-    case "Moving out":  return "MOVING_OUT"
-    case "Inactive":    return "INACTIVE"
+    // sweep v1 SWEEP:roster vocabulary
+    case "OCCUPIED":    return "OCCUPIED"
+    case "VACANT":      return "VACANT"
+    case "NEEDS FLIP":  return "VACANT"     // between tenants — no current occupant
+    // converged Stage 3/4 PadSplit financial status vocabulary
+    case "BEHIND":      return "OCCUPIED"   // behind on payment but STILL occupying
+    case "TERMINATION RISK": return "OCCUPIED"
+    case "EVICTION":    return "OCCUPIED"   // still physically in the room
+    // shared
+    case "MOVING IN":
+    case "MOVING_IN":   return "MOVING_IN"
+    case "MOVING OUT":
+    case "MOVING_OUT":  return "MOVING_OUT"
+    case "INACTIVE":    return "INACTIVE"
     default:            return null
   }
 }
