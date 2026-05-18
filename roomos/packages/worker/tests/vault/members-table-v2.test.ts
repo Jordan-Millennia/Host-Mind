@@ -10,7 +10,7 @@ import { parseMembersTable } from "../../src/vault/parsers/members-table"
 // columns by name) so it survives all three roster schemas, and it must
 // surface the balance the rent-roll needs.
 const V2 = readFileSync(
-  join(__dirname, "../fixtures/vault/swept-roster-v2.md"),
+  join(__dirname, "../fixtures/rosters/swept-roster-v2.md"),
   "utf-8",
 )
 

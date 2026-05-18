@@ -12,7 +12,7 @@ import { parseMembersTable } from "../../src/vault/parsers/members-table"
 // have no member, so they are skipped — exactly like the legacy parser's
 // `if (!name) continue`. (Vacant-room visibility is a separate concern.)
 const SWEPT = readFileSync(
-  join(__dirname, "../fixtures/vault/swept-roster.md"),
+  join(__dirname, "../fixtures/rosters/swept-roster.md"),
   "utf-8",
 )
 
