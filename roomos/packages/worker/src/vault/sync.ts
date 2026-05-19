@@ -7,7 +7,7 @@ import { parseDossier } from "./parsers/dossier"
 import { upsertProperty } from "./persist/property"
 import { upsertRoomWithListing } from "./persist/room"
 import { upsertMember } from "./persist/member"
-import { upsertOccupancyForListing } from "./persist/occupancy"
+import { upsertOccupancyForListing, closeOccupancyAsMovedOut } from "./persist/occupancy"
 import { upsertFlag } from "./persist/flag"
 import type { VaultSyncResult, VaultMemberDossier } from "./types"
 
@@ -24,6 +24,7 @@ export async function syncVault(input: SyncVaultInput): Promise<VaultSyncResult>
     roomsUpserted: 0,
     membersUpserted: 0,
     occupanciesUpserted: 0,
+    occupanciesClosed: 0,
     flagsUpserted: 0,
     errors: [],
   }
@@ -57,12 +58,18 @@ export async function syncVault(input: SyncVaultInput): Promise<VaultSyncResult>
         })
         result.propertiesUpserted++
 
+        // Listings written this sync for this property. Anything else on
+        // the property with an open occupancy is a member who left the
+        // roster (moved out) and must be reconciled out below.
+        const processedListingIds = new Set<string>()
+
         for (const row of parsed.members) {
           const { roomId, listingId } = await upsertRoomWithListing(
             input.orgId,
             propertyId,
             row.roomNumber,
           )
+          processedListingIds.add(listingId)
           result.roomsUpserted++
 
           const dossier = dossiers.get(row.name) ?? null
@@ -93,6 +100,23 @@ export async function syncVault(input: SyncVaultInput): Promise<VaultSyncResult>
 
           // ignore roomId in this phase; reserved for future room-level flagging
           void roomId
+        }
+
+        // Move-out reconciliation: any PADSPLIT listing on this property
+        // with an open occupancy that the roster no longer reports a member
+        // for → close it and mark the room VACANT. The sweep roster is
+        // authoritative for who is currently in which room.
+        const propertyListings = await prisma.platformListing.findMany({
+          where: { orgId: input.orgId, room: { propertyId } },
+          select: { id: true },
+        })
+        for (const { id: listingId } of propertyListings) {
+          if (processedListingIds.has(listingId)) continue
+          const closed = await closeOccupancyAsMovedOut({
+            orgId: input.orgId,
+            listingId,
+          })
+          if (closed) result.occupanciesClosed++
         }
 
         for (const flag of parsed.flagsAndAlerts) {

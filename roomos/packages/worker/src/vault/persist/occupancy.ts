@@ -80,3 +80,41 @@ export async function upsertOccupancyForListing(input: UpsertOccupancyInput): Pr
     },
   })
 }
+
+/**
+ * Move-out reconciliation: a listing the sweep no longer reports a member
+ * for (member moved out / room dropped from the roster). Close the open
+ * occupancy and record the room VACANT so the dashboard stops showing the
+ * departed member. Idempotent: a no-op once the listing is already an open
+ * VACANT/no-member row, so repeated syncs add no rows.
+ *
+ * Returns true only when it actually closed a stale occupancy.
+ */
+export async function closeOccupancyAsMovedOut(input: {
+  orgId: string
+  listingId: string
+}): Promise<boolean> {
+  const current = await prisma.occupancy.findFirst({
+    where: { listingId: input.listingId, leaseEndDate: null },
+    orderBy: { createdAt: "desc" },
+  })
+  // Nothing open, or already an open vacant/no-member row → idempotent no-op.
+  if (!current) return false
+  if (current.status === "VACANT" && current.memberId === null) return false
+
+  await prisma.occupancy.update({
+    where: { id: current.id },
+    data: { leaseEndDate: new Date() },
+  })
+  await prisma.occupancy.create({
+    data: {
+      orgId: input.orgId,
+      listingId: input.listingId,
+      memberId: null,
+      status: "VACANT",
+      currentBalance: null,
+      scrapedAt: new Date(),
+    },
+  })
+  return true
+}

@@ -46,4 +46,87 @@ describe("syncVault (integration, fixture vault)", () => {
     expect(run?.status).toBe("SUCCESS")
     expect(run?.itemsSynced).toBeGreaterThan(0)
   })
+
+  it("move-out reconciliation: closes occupancy for a member no longer in the roster and marks the room vacant", async () => {
+    // First sync establishes the property + its 6 roster rooms.
+    await syncVault({ orgId: ORG_ID, vaultPath: FIXTURE_VAULT })
+    const property = await prisma.property.findUnique({
+      where: { padsplitPropertyId: "28685" },
+    })
+    expect(property).not.toBeNull()
+
+    // Simulate a member who WAS occupying a room but is no longer in the
+    // roster (moved out). Seed R99 + listing + an OPEN OCCUPIED occupancy.
+    const room = await prisma.room.create({
+      data: { orgId: ORG_ID, propertyId: property!.id, roomNumber: "R99" },
+    })
+    const listing = await prisma.platformListing.create({
+      data: { orgId: ORG_ID, roomId: room.id, platform: "PADSPLIT" },
+    })
+    const member = await prisma.member.create({
+      data: {
+        orgId: ORG_ID,
+        platform: "PADSPLIT",
+        externalMemberId: `gone-${Date.now()}`,
+        name: "Gone Member",
+      },
+    })
+    const stale = await prisma.occupancy.create({
+      data: {
+        orgId: ORG_ID,
+        listingId: listing.id,
+        memberId: member.id,
+        status: "OCCUPIED",
+      },
+    })
+
+    // Re-sync: R99 is NOT in the fixture roster → must be reconciled out.
+    await syncVault({ orgId: ORG_ID, vaultPath: FIXTURE_VAULT })
+
+    const closed = await prisma.occupancy.findUnique({ where: { id: stale.id } })
+    expect(closed!.leaseEndDate).not.toBeNull() // moved-out occupancy closed
+
+    const open = await prisma.occupancy.findFirst({
+      where: { listingId: listing.id, leaseEndDate: null },
+      orderBy: { createdAt: "desc" },
+    })
+    expect(open).not.toBeNull()
+    expect(open!.status).toBe("VACANT")
+    expect(open!.memberId).toBeNull()
+
+    // The 6 real roster occupancies must remain open and untouched.
+    const openRoster = await prisma.occupancy.count({
+      where: { orgId: ORG_ID, leaseEndDate: null, memberId: { not: null } },
+    })
+    expect(openRoster).toBe(6)
+  })
+
+  it("move-out reconciliation is idempotent — a second pass adds no rows", async () => {
+    await syncVault({ orgId: ORG_ID, vaultPath: FIXTURE_VAULT })
+    const property = await prisma.property.findUnique({
+      where: { padsplitPropertyId: "28685" },
+    })
+    const room = await prisma.room.create({
+      data: { orgId: ORG_ID, propertyId: property!.id, roomNumber: "R98" },
+    })
+    const listing = await prisma.platformListing.create({
+      data: { orgId: ORG_ID, roomId: room.id, platform: "PADSPLIT" },
+    })
+    const member = await prisma.member.create({
+      data: {
+        orgId: ORG_ID,
+        platform: "PADSPLIT",
+        externalMemberId: `gone2-${Date.now()}`,
+        name: "Gone Member 2",
+      },
+    })
+    await prisma.occupancy.create({
+      data: { orgId: ORG_ID, listingId: listing.id, memberId: member.id, status: "OCCUPIED" },
+    })
+    await syncVault({ orgId: ORG_ID, vaultPath: FIXTURE_VAULT }) // reconciles R98 → VACANT
+    const after1 = await prisma.occupancy.count({ where: { orgId: ORG_ID } })
+    await syncVault({ orgId: ORG_ID, vaultPath: FIXTURE_VAULT }) // must be a no-op
+    const after2 = await prisma.occupancy.count({ where: { orgId: ORG_ID } })
+    expect(after2).toBe(after1)
+  })
 })
