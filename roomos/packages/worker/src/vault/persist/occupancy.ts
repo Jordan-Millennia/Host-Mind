@@ -53,10 +53,6 @@ export async function upsertOccupancyForListing(input: UpsertOccupancyInput): Pr
     current.memberId === input.memberId
   ) {
     const storedBalance = current.currentBalance == null ? null : Number(current.currentBalance)
-    // DEBUG: log whenever idempotency fires so we can see values in stderr
-    process.stderr.write(
-      JSON.stringify({ debug: "idempotency", listing: input.listingId, balance, storedBalance, willUpdate: balance !== storedBalance }) + "\n"
-    )
     if (balance !== storedBalance) {
       await prisma.occupancy.update({
         where: { id: current.id },
