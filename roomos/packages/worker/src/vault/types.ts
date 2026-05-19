@@ -64,6 +64,7 @@ export type VaultSyncResult = {
   roomsUpserted: number
   membersUpserted: number
   occupanciesUpserted: number
+  occupanciesClosed: number
   flagsUpserted: number
   errors: { file: string; reason: string }[]
 }
