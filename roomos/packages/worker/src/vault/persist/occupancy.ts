@@ -3,25 +3,21 @@ import type { OccupancyStatus } from "@roomos/db"
 
 export function mapStatusText(text: string): OccupancyStatus | null {
   switch (text.trim().toUpperCase()) {
-    // legacy "## Current Members" vocabulary
-    case "ACTIVE":      return "OCCUPIED"   // also the converged PadSplit "ACTIVE"
-    case "VACATED":     return "VACANT"
-    case "TERMINATED":  return "INACTIVE"
-    // sweep v1 SWEEP:roster vocabulary
-    case "OCCUPIED":    return "OCCUPIED"
-    case "VACANT":      return "VACANT"
-    case "NEEDS FLIP":  return "VACANT"     // between tenants — no current occupant
-    // converged Stage 3/4 PadSplit financial status vocabulary
-    case "BEHIND":      return "OCCUPIED"   // behind on payment but STILL occupying
+    case "ACTIVE":           return "OCCUPIED"
+    case "VACATED":          return "VACANT"
+    case "TERMINATED":       return "INACTIVE"
+    case "OCCUPIED":         return "OCCUPIED"
+    case "VACANT":           return "VACANT"
+    case "NEEDS FLIP":       return "VACANT"
+    case "BEHIND":           return "OCCUPIED"
     case "TERMINATION RISK": return "OCCUPIED"
-    case "EVICTION":    return "OCCUPIED"   // still physically in the room
-    // shared
+    case "EVICTION":         return "OCCUPIED"
     case "MOVING IN":
-    case "MOVING_IN":   return "MOVING_IN"
+    case "MOVING_IN":        return "MOVING_IN"
     case "MOVING OUT":
-    case "MOVING_OUT":  return "MOVING_OUT"
-    case "INACTIVE":    return "INACTIVE"
-    default:            return null
+    case "MOVING_OUT":       return "MOVING_OUT"
+    case "INACTIVE":         return "INACTIVE"
+    default:                  return null
   }
 }
 
@@ -49,16 +45,27 @@ export async function upsertOccupancyForListing(input: UpsertOccupancyInput): Pr
     orderBy: { createdAt: "desc" },
   })
 
-  // Idempotency check: if the current open occupancy already matches what we're about to write, exit.
+  const balance = parseBalance(input.balanceText)
+
   if (
     current &&
     current.status === status &&
     current.memberId === input.memberId
   ) {
+    const storedBalance = current.currentBalance == null ? null : Number(current.currentBalance)
+    // DEBUG: log whenever idempotency fires so we can see values in stderr
+    process.stderr.write(
+      JSON.stringify({ debug: "idempotency", listing: input.listingId, balance, storedBalance, willUpdate: balance !== storedBalance }) + "\n"
+    )
+    if (balance !== storedBalance) {
+      await prisma.occupancy.update({
+        where: { id: current.id },
+        data: { currentBalance: balance, scrapedAt: new Date() },
+      })
+    }
     return
   }
 
-  // If there's an open occupancy with a different shape, close it.
   if (current) {
     await prisma.occupancy.update({
       where: { id: current.id },
@@ -66,7 +73,6 @@ export async function upsertOccupancyForListing(input: UpsertOccupancyInput): Pr
     })
   }
 
-  const balance = parseBalance(input.balanceText)
   await prisma.occupancy.create({
     data: {
       orgId: input.orgId,

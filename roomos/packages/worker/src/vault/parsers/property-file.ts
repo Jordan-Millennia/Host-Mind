@@ -4,7 +4,9 @@ import { parseMembersTable } from "./members-table"
 import { parseFlags } from "./flags"
 import { parseMaintenance } from "./maintenance"
 
-export function parsePropertyFile(content: string, filePath: string): VaultPropertyFile {
+export function parsePropertyFile(rawContent: string, filePath: string): VaultPropertyFile {
+  // Normalize CRLF and old Mac CR to LF so all downstream parsers can split on \n
+  const content = rawContent.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
   const fm = parseFrontmatter(content)
   if (!fm.padsplitPropertyId) {
     throw new Error(`Property file at ${filePath} is missing padsplit-property-id`)

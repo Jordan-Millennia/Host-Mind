@@ -11,13 +11,17 @@ export type ParsedFrontmatter = {
 }
 
 export function parseFrontmatter(content: string): ParsedFrontmatter {
+  // Normalize Windows CRLF → LF so gray-matter can find the closing --- delimiter
+  const normalized = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
+
   let data: Record<string, unknown>
   try {
-    data = matter(content).data
+    data = matter(normalized).data
   } catch (err) {
     throw new Error(`Invalid YAML frontmatter: ${(err as Error).message}`)
   }
-  if (Object.keys(data).length === 0 && !content.startsWith("---")) {
+
+  if (Object.keys(data).length === 0 && !normalized.startsWith("---")) {
     throw new Error("No YAML frontmatter block found")
   }
 
@@ -26,6 +30,7 @@ export function parseFrontmatter(content: string): ParsedFrontmatter {
     if (v === undefined || v === null || v === "") return null
     return String(v)
   }
+
   const num = (k: string): number | null => {
     const v = data[k]
     if (v === undefined || v === null || v === "") return null
