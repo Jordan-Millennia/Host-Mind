@@ -29,4 +29,25 @@ describe("parseDossier", () => {
     expect(d.email).toBeNull()
     expect(d.weeklyRate).toBeNull()
   })
+
+  it("extracts last-payment-date + last-payment-amount from Stage-4 frontmatter", () => {
+    const md = [
+      "---",
+      'name: "Ace Gurley"',
+      'member-id: "m-501"',
+      'last-payment-date: "2026-05-16"',
+      'last-payment-amount: 200',
+      "---",
+      "",
+    ].join("\n")
+    const d = parseDossier(md, "/Ace.md")
+    expect(d.lastPaymentDate).toBe("2026-05-16")
+    expect(d.lastPaymentAmount).toBe(200)
+  })
+
+  it("treats missing payment fields as null", () => {
+    const d = parseDossier(`---\nname: "x"\n---\n`, "/x.md")
+    expect(d.lastPaymentDate).toBeNull()
+    expect(d.lastPaymentAmount).toBeNull()
+  })
 })

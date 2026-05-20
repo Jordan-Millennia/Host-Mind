@@ -51,6 +51,9 @@ export type VaultMemberDossier = {
   name: string
   email: string | null
   phone: string | null
+  // Stage-4 sweep payment fields (frontmatter: last-payment-date / -amount).
+  lastPaymentDate: string | null       // ISO date string
+  lastPaymentAmount: number | null
   weeklyRate: number | null
   moveInDate: string | null            // ISO date string from frontmatter
   status: string | null

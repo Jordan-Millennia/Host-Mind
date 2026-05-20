@@ -9,6 +9,7 @@ import { upsertRoomWithListing } from "./persist/room"
 import { upsertMember } from "./persist/member"
 import { upsertOccupancyForListing, closeOccupancyAsMovedOut } from "./persist/occupancy"
 import { upsertFlag } from "./persist/flag"
+import { recordPaymentEvent } from "../persist"
 import type { VaultSyncResult, VaultMemberDossier } from "./types"
 
 export type SyncVaultInput = {
@@ -97,6 +98,26 @@ export async function syncVault(input: SyncVaultInput): Promise<VaultSyncResult>
             balanceText: row.balanceText,
           })
           result.occupanciesUpserted++
+
+          // Bridge: if the Stage-4 sweep recorded a last-payment-date +
+          // last-payment-amount on this member's dossier, upsert a
+          // PaymentEvent. Idempotent via the upsert key (memberId,
+          // externalEventId) so re-syncs are no-ops; a new payment date or
+          // amount produces a new externalEventId → a new event row →
+          // payment history grows. Phase-2A's PaymentEvent writer was
+          // unscheduled; this puts real data on /members "Last paid".
+          if (dossier?.lastPaymentDate && dossier.lastPaymentAmount != null) {
+            const eventDate = dossier.lastPaymentDate
+            const amount = dossier.lastPaymentAmount.toFixed(2)
+            await recordPaymentEvent({
+              orgId: input.orgId,
+              memberId,
+              occupancyId: null,
+              amount,
+              eventDate,
+              externalEventId: `vault-dossier:${eventDate}:${amount}`,
+            })
+          }
 
           // ignore roomId in this phase; reserved for future room-level flagging
           void roomId

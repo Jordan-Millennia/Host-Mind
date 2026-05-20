@@ -23,5 +23,7 @@ export function parseDossier(content: string, filePath: string): VaultMemberDoss
     moveInDate: str("move-in-date"),
     status: str("status"),
     balance: num("balance"),
+    lastPaymentDate: str("last-payment-date"),
+    lastPaymentAmount: num("last-payment-amount"),
   }
 }
