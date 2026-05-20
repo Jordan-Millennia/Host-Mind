@@ -6,6 +6,8 @@ import { SyncPill } from "./SyncPill"
 const NAV = [
   { href: "/rooms", label: "Rooms" },
   { href: "/all-rooms", label: "All Rooms" },
+  { href: "/properties", label: "Properties" },
+  { href: "/members", label: "Members" },
   { href: "/owners", label: "Owners" },
   { href: "/activity", label: "Activity" },
   { href: "/settings", label: "Settings" },
