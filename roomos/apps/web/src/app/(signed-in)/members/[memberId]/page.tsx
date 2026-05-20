@@ -94,6 +94,46 @@ export default async function MemberDetailPage({
         </div>
       </section>
 
+      <section className="mb-12">
+        <h2 className="font-[family-name:var(--font-display)] text-xl font-medium mb-4">
+          Payments{" "}
+          <span className="italic text-[color:var(--color-muted)] text-base">
+            — {member.payments.length} record{member.payments.length === 1 ? "" : "s"}
+          </span>
+        </h2>
+        {member.payments.length === 0 ? (
+          <p className="text-sm text-[color:var(--color-muted)]">
+            No payment events recorded. The deep sweep will populate this once a
+            last-payment-date / last-payment-amount lands in this member&apos;s dossier.
+          </p>
+        ) : (
+          <div className="border border-[color:var(--color-rule)] rounded-sm overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-[color:var(--color-surface)]/60 text-[10px] uppercase tracking-[0.14em] text-[color:var(--color-muted)]">
+                <tr>
+                  <th className="px-4 py-3 text-left font-medium">Date</th>
+                  <th className="px-4 py-3 text-right font-medium">Amount</th>
+                  <th className="px-4 py-3 text-left font-medium">Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {member.payments.map((p) => (
+                  <tr key={p.id} className="border-t border-[color:var(--color-rule)]/60">
+                    <td className="px-4 py-3 text-[color:var(--color-muted)]">{formatDate(p.eventDate)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {formatMoney(p.amount)}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-[color:var(--color-muted)] uppercase tracking-[0.1em]">
+                      {p.eventType.toLowerCase()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
       <section>
         <h2 className="font-[family-name:var(--font-display)] text-xl font-medium mb-4">
           Occupancy history <span className="italic text-[color:var(--color-muted)] text-base">— {member.history.length} record{member.history.length === 1 ? "" : "s"}</span>

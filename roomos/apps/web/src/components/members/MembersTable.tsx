@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { formatMoney } from "@/lib/format"
+import { formatMoney, formatDaysAgo } from "@/lib/format"
 import type { MemberListRow } from "@/lib/members-queries"
 
 const STATUS_LABEL: Record<string, string> = {
@@ -46,6 +46,7 @@ export function MembersTable({ rows }: { rows: MemberListRow[] }) {
             <Th>Property</Th>
             <Th className="text-right">Room</Th>
             <Th className="text-right">Balance</Th>
+            <Th className="text-right">Last paid</Th>
             <Th>Contact</Th>
           </tr>
         </thead>
@@ -90,6 +91,20 @@ export function MembersTable({ rows }: { rows: MemberListRow[] }) {
               <Td className="text-right tabular-nums">{m.roomNumber ?? "—"}</Td>
               <Td className={`text-right tabular-nums ${balanceTone(m.balance)}`}>
                 {m.balance == null ? "—" : formatMoney(m.balance)}
+              </Td>
+              <Td className="text-right tabular-nums">
+                {m.lastPaidAmount == null ? (
+                  <span className="text-[color:var(--color-muted)]">—</span>
+                ) : (
+                  <span>
+                    {formatMoney(m.lastPaidAmount)}
+                    {m.lastPaidDate ? (
+                      <span className="block text-[10px] text-[color:var(--color-muted)] mt-0.5">
+                        {formatDaysAgo(m.lastPaidDate)}
+                      </span>
+                    ) : null}
+                  </span>
+                )}
               </Td>
               <Td className="text-[color:var(--color-muted)] text-xs">
                 {m.email ?? m.phone ?? "—"}

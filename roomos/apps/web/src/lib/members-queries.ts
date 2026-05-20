@@ -14,6 +14,9 @@ export type MemberListRow = {
   /** Latest balance from the open occupancy. Negative = past due owed. */
   balance: number | null
   occupancySince: Date | null
+  /** Most recent PaymentEvent (any type) — null if member has never paid in-system. */
+  lastPaidDate: Date | null
+  lastPaidAmount: number | null
 }
 
 export type MemberListResult = {
@@ -79,11 +82,17 @@ export async function getMembersForList(
           },
         },
       },
+      paymentEvents: {
+        orderBy: { eventDate: "desc" },
+        take: 1,
+        select: { eventDate: true, amount: true },
+      },
     },
   })
 
   const rows: MemberListRow[] = members.map((m) => {
     const occ = m.occupancies[0]
+    const lastPay = m.paymentEvents[0]
     return {
       id: m.id,
       name: m.name,
@@ -97,6 +106,8 @@ export async function getMembersForList(
       roomNumber: occ?.listing.room.roomNumber ?? null,
       balance: occ?.currentBalance == null ? null : Number(occ.currentBalance),
       occupancySince: occ?.scrapedAt ?? null,
+      lastPaidDate: lastPay?.eventDate ?? null,
+      lastPaidAmount: lastPay?.amount == null ? null : Number(lastPay.amount),
     }
   })
 
@@ -157,6 +168,12 @@ export type MemberDetail = {
     leaseStartedAt: Date | null
     leaseEndedAt: Date | null
   }>
+  payments: Array<{
+    id: string
+    eventDate: Date
+    amount: number
+    eventType: string
+  }>
 }
 
 export async function getMemberById(
@@ -177,6 +194,10 @@ export async function getMemberById(
             },
           },
         },
+      },
+      paymentEvents: {
+        orderBy: { eventDate: "desc" },
+        select: { id: true, eventDate: true, amount: true, eventType: true },
       },
     },
   })
@@ -206,6 +227,13 @@ export async function getMemberById(
     leaseEndedAt: o.leaseEndDate,
   }))
 
+  const payments = member.paymentEvents.map((p) => ({
+    id: p.id,
+    eventDate: p.eventDate,
+    amount: Number(p.amount),
+    eventType: p.eventType,
+  }))
+
   return {
     id: member.id,
     name: member.name,
@@ -215,5 +243,6 @@ export async function getMemberById(
     firstSeenAt: member.firstSeenAt,
     current,
     history,
+    payments,
   }
 }
