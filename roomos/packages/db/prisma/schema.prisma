@@ -49,6 +49,7 @@ enum SyncKind {
   FINANCIAL
   INTERACTIVE_LOGIN
   VAULT_SYNC
+  AIRBNB_SYNC
 }
 
 enum FlagSeverity {
@@ -174,7 +175,7 @@ model Room {
 model PlatformListing {
   id                  String         @id @default(cuid())
   orgId               String         @map("org_id")
-  roomId              String         @map("room_id")
+  roomId              String?        @map("room_id")
   platform            Platform
   externalListingId   String?        @map("external_listing_id")
   externalPropertyId  String?        @map("external_property_id")
@@ -185,10 +186,10 @@ model PlatformListing {
   updatedAt           DateTime       @updatedAt @map("updated_at")
 
   org         Org          @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  room        Room?        @relation(fields: [roomId], references: [id], onDelete: SetNull)
   occupancies Occupancy[]
 
-  @@unique([roomId, platform])
+  @@unique([platform, externalListingId], map: "platform_listings_platform_external_listing_id_key")
   @@index([orgId, platform])
   @@map("platform_listings")
 }

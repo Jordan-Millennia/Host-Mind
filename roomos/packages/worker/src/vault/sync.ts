@@ -69,6 +69,7 @@ export async function syncVault(input: SyncVaultInput): Promise<VaultSyncResult>
             input.orgId,
             propertyId,
             row.roomNumber,
+            parsed.padsplitPropertyId,
           )
           processedListingIds.add(listingId)
           result.roomsUpserted++

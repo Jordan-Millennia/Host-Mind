@@ -100,10 +100,10 @@ export async function getMembersForList(
       phone: m.phone,
       dossierPath: m.memberDossierPath,
       status: occ?.status ?? null,
-      property: occ?.listing.room.property
+      property: occ?.listing.room?.property
         ? { id: occ.listing.room.property.id, address: occ.listing.room.property.address }
         : null,
-      roomNumber: occ?.listing.room.roomNumber ?? null,
+      roomNumber: occ?.listing.room?.roomNumber ?? null,
       balance: occ?.currentBalance == null ? null : Number(occ.currentBalance),
       occupancySince: occ?.scrapedAt ?? null,
       lastPaidDate: lastPay?.eventDate ?? null,
@@ -204,14 +204,15 @@ export async function getMemberById(
   if (!member) return null
 
   const open = member.occupancies.find((o) => o.leaseEndDate == null)
-  const current = open
+  const openRoom = open?.listing.room ?? null
+  const current = open && openRoom
     ? {
         status: open.status,
         property: {
-          id: open.listing.room.property.id,
-          address: open.listing.room.property.address,
+          id: openRoom.property.id,
+          address: openRoom.property.address,
         },
-        roomNumber: open.listing.room.roomNumber,
+        roomNumber: openRoom.roomNumber,
         balance: open.currentBalance == null ? null : Number(open.currentBalance),
         since: open.scrapedAt,
       }
@@ -220,8 +221,8 @@ export async function getMemberById(
   const history = member.occupancies.map((o) => ({
     id: o.id,
     status: o.status,
-    propertyAddress: o.listing.room.property.address,
-    roomNumber: o.listing.room.roomNumber,
+    propertyAddress: o.listing.room?.property.address ?? "(unmapped listing)",
+    roomNumber: o.listing.room?.roomNumber ?? null,
     balance: o.currentBalance == null ? null : Number(o.currentBalance),
     leaseStartedAt: o.scrapedAt,
     leaseEndedAt: o.leaseEndDate,
