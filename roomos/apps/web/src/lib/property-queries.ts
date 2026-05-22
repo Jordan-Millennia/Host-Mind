@@ -180,3 +180,66 @@ export async function getPropertyDetail(orgId: string, propertyId: string): Prom
     lastVaultSyncAt: lastSync?.completedAt ?? null,
   }
 }
+
+export type UnmappedAirbnbListing = {
+  listingId: string
+  externalListingId: string
+  candidatePropertyId: string | null
+  candidatePropertyAddress: string | null
+  lastSyncedAt: Date | null
+}
+
+export async function getUnmappedAirbnbListings(orgId: string): Promise<UnmappedAirbnbListing[]> {
+  const rows = await prisma.platformListing.findMany({
+    where: { orgId, platform: "AIRBNB", roomId: null, isActive: true },
+    select: { id: true, externalListingId: true, lastSyncedAt: true },
+    orderBy: { lastSyncedAt: "desc" },
+  })
+  // For Phase 2B v1 we don't surface a candidate property — the operator picks any
+  // room in the dropdown on the Settings page. (A future pass can derive a candidate
+  // from the matcher's PropertyFlag, keyed `airbnb-unmapped-${externalListingId}`.)
+  return rows.map((r) => ({
+    listingId: r.id,
+    externalListingId: r.externalListingId ?? "",
+    candidatePropertyId: null,
+    candidatePropertyAddress: null,
+    lastSyncedAt: r.lastSyncedAt,
+  }))
+}
+
+export type CrossListedRoom = {
+  roomId: string
+  propertyId: string
+  propertyAddress: string
+  roomNumber: string
+  platforms: string[]
+}
+
+/** A cross-listed room is one mapped to >1 distinct active platform (e.g. PadSplit
+ *  AND Airbnb). Derived from active listings — mirrors the worker's cross-listing
+ *  detector, which opens a DANGER PropertyFlag for the same condition. */
+export async function getCrossListedRooms(orgId: string): Promise<CrossListedRoom[]> {
+  const listings = await prisma.platformListing.findMany({
+    where: { orgId, isActive: true, roomId: { not: null } },
+    select: {
+      platform: true,
+      roomId: true,
+      room: { select: { roomNumber: true, propertyId: true, property: { select: { address: true } } } },
+    },
+  })
+  const byRoom = new Map<string, CrossListedRoom>()
+  for (const l of listings) {
+    if (!l.roomId || !l.room?.property) continue
+    const key = l.roomId
+    const entry = byRoom.get(key) ?? {
+      roomId: key,
+      propertyId: l.room.propertyId,
+      propertyAddress: l.room.property.address,
+      roomNumber: l.room.roomNumber ?? "",
+      platforms: [],
+    }
+    if (!entry.platforms.includes(l.platform)) entry.platforms.push(l.platform)
+    byRoom.set(key, entry)
+  }
+  return Array.from(byRoom.values()).filter((r) => r.platforms.length > 1)
+}
