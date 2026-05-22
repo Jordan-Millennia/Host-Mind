@@ -28,7 +28,9 @@ cd roomos
 pnpm --filter @roomos/worker exec tsx src/cli.ts airbnb-login
 ```
 
-A headful Chromium window opens at `airbnb.com/login`. Sign in, handle any MFA. When you land on `/hosting`, the worker captures the storage state and exits. Cookie jar lands at `~/Library/Application Support/RoomOS/.auth/airbnb.json`.
+A headful Chromium window opens at `airbnb.com/login`. Sign in, handle any MFA. When you land on `/hosting`, the worker captures the storage state and exits. Cookie jar lands at `~/Library/Application Support/RoomOS/.auth/airbnb.json`. Verify with `… check --platform airbnb` ("airbnb session is active"). (Final CLI command shape is wired in Task 17.)
+
+**Cookie-jar encryption (decision):** the Airbnb jar reuses Phase-1B's mechanism — AES-256-GCM with the 32-byte key derived from the macOS Keychain via the `security` CLI (`packages/worker/src/keychain.ts`, service `com.cohostmgmt.roomos`), sealed into a versioned envelope (`packages/worker/src/cookies.ts`), written mode `0600`. **No `keytar`/native dependency was added** — same protection PadSplit's `padsplit.json` already uses.
 
 ## 3. Restart the launchd worker
 
