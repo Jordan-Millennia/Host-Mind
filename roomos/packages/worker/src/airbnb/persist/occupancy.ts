@@ -2,18 +2,19 @@ import { prisma } from "@roomos/db"
 import type { OccupancyStatus } from "@roomos/db"
 import type { AirbnbBookingRow } from "../types"
 
-function slug(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
-}
-
 function statusFor(booking: AirbnbBookingRow, now: Date): OccupancyStatus | null {
   if (booking.status === "canceled") return null
   const today = now.toISOString().slice(0, 10)
-  if (booking.checkIn === today) return "MOVING_IN"
+  const tomorrow = new Date(now.getTime() + 86400000).toISOString().slice(0, 10)
+  // Leaving today.
   if (booking.checkOut === today) return "MOVING_OUT"
-  if (booking.checkIn < today && booking.checkOut > today) return "OCCUPIED"
-  if (booking.checkIn > today) return null   // future booking — don't write yet
-  return "INACTIVE"                            // past completed
+  // Arrived (today or earlier) and not yet checkout day → currently staying.
+  if (booking.checkIn <= today && today < booking.checkOut) return "OCCUPIED"
+  // Future arrival: only the 24h pre-arrival window is MOVING_IN; anything
+  // further out we don't write yet.
+  if (booking.checkIn > today) return booking.checkIn === tomorrow ? "MOVING_IN" : null
+  // checkOut < today → already past.
+  return "INACTIVE"
 }
 
 async function upsertGuestMember(orgId: string, booking: AirbnbBookingRow): Promise<string> {
