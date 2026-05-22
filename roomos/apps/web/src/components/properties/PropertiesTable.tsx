@@ -2,6 +2,7 @@
 import Link from "next/link"
 import type { PropertyRow } from "@/lib/property-queries"
 import { OccupancyDonut } from "./OccupancyDonut"
+import { CrossListingBadge } from "./CrossListingBadge"
 
 export function PropertiesTable({ rows }: { rows: PropertyRow[] }) {
   return (
@@ -28,12 +29,15 @@ export function PropertiesTable({ rows }: { rows: PropertyRow[] }) {
                 {r.padsplitPropertyId ?? "—"}
               </td>
               <td className="px-5 py-5">
-                <Link
-                  href={`/properties/${r.id}`}
-                  className="block font-medium text-[color:var(--color-ink)] -mb-0.5"
-                >
-                  {r.address.split(",")[0]}
-                </Link>
+                <div className="flex items-center gap-2 -mb-0.5">
+                  <Link
+                    href={`/properties/${r.id}`}
+                    className="font-medium text-[color:var(--color-ink)]"
+                  >
+                    {r.address.split(",")[0]}
+                  </Link>
+                  <CrossListingBadge count={r.crossListedRoomCount} />
+                </div>
                 <div className="text-xs text-[color:var(--color-ink-3)] tracking-wide">
                   {[r.city, r.state].filter(Boolean).join(", ")}
                   {r.ownerName ? <span className="text-[color:var(--color-ink-2)]"> · {r.ownerName}</span> : null}

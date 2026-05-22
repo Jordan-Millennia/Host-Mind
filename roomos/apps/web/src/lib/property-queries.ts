@@ -13,9 +13,16 @@ export type PropertyRow = {
   occupiedRooms: number
   vacantRooms: number
   movingRooms: number
+  crossListedRoomCount: number
 }
 
 export async function getPropertiesForList(orgId: string): Promise<PropertyRow[]> {
+  const crossListed = await getCrossListedRooms(orgId)
+  const crossCountByProperty = new Map<string, number>()
+  for (const r of crossListed) {
+    crossCountByProperty.set(r.propertyId, (crossCountByProperty.get(r.propertyId) ?? 0) + 1)
+  }
+
   const properties = await prisma.property.findMany({
     where: { orgId },
     include: {
@@ -64,6 +71,7 @@ export async function getPropertiesForList(orgId: string): Promise<PropertyRow[]
       occupiedRooms: occupied,
       vacantRooms: vacant,
       movingRooms: moving,
+      crossListedRoomCount: crossCountByProperty.get(p.id) ?? 0,
     }
   })
 }
