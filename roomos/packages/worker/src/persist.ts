@@ -68,9 +68,16 @@ export async function upsertDiscovery(
       roomsAdded++
     }
 
-    // Find or create the PlatformListing.
+    // Find or create the PlatformListing. (Phase 2B: lookup key is now
+    // (platform, externalListingId); Phase-1B path is retired/dead but must
+    // compile against the current schema.)
     const existingListing = await prisma.platformListing.findUnique({
-      where: { roomId_platform: { roomId: room.id, platform: "PADSPLIT" as Platform } },
+      where: {
+        platform_externalListingId: {
+          platform: "PADSPLIT" as Platform,
+          externalListingId: r.externalRoomId,
+        },
+      },
     })
     if (!existingListing) {
       await prisma.platformListing.create({
