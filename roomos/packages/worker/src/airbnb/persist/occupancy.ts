@@ -35,9 +35,19 @@ export type UpsertAirbnbOccupancyInput = {
   booking: AirbnbBookingRow
 }
 
-export async function upsertAirbnbOccupancyForBooking(input: UpsertAirbnbOccupancyInput): Promise<void> {
+/**
+ * Returns the guest member + occupancy ids so the orchestrator can attach a
+ * payout to the right member by confirmation code (the guest's member is keyed
+ * by `guestUserId` when present, NOT by the synthetic `airbnb-guest:<code>` id,
+ * so re-deriving the key downstream would miss most rows). Returns `null` when
+ * the booking maps to no occupancy (canceled, or further out than the MOVING_IN
+ * window) — those have no member/occupancy and so can carry no payout.
+ */
+export async function upsertAirbnbOccupancyForBooking(
+  input: UpsertAirbnbOccupancyInput,
+): Promise<{ memberId: string; occupancyId: string } | null> {
   const status = statusFor(input.booking, new Date())
-  if (!status) return
+  if (!status) return null
 
   // Idempotency: existing occupancy keyed by listing + member with matching dates and status
   const memberId = await upsertGuestMember(input.orgId, input.booking)
@@ -53,7 +63,7 @@ export async function upsertAirbnbOccupancyForBooking(input: UpsertAirbnbOccupan
     if (existing.status !== status) {
       await prisma.occupancy.update({ where: { id: existing.id }, data: { status, leaseEndDate: new Date(input.booking.checkOut) } })
     }
-    return
+    return { memberId, occupancyId: existing.id }
   }
 
   // Close any open occupancy on this listing if a new booking starts
@@ -65,7 +75,7 @@ export async function upsertAirbnbOccupancyForBooking(input: UpsertAirbnbOccupan
     await prisma.occupancy.update({ where: { id: open.id }, data: { leaseEndDate: new Date() } })
   }
 
-  await prisma.occupancy.create({
+  const created = await prisma.occupancy.create({
     data: {
       orgId: input.orgId,
       listingId: input.listingId,
@@ -76,4 +86,5 @@ export async function upsertAirbnbOccupancyForBooking(input: UpsertAirbnbOccupan
       scrapedAt: new Date(),
     },
   })
+  return { memberId, occupancyId: created.id }
 }

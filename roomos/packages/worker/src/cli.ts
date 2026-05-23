@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import { log } from "./log"
 import { interactiveLogin, checkPadsplitSession } from "./padsplit/login"
+import { interactiveLogin as airbnbInteractiveLogin, checkAirbnbSession } from "./airbnb/login"
 import { processVaultSync } from "./jobs/vault-sync"
+import { processAirbnbSync } from "./jobs/airbnb-sync"
 
 async function main() {
   const [command, ...rest] = process.argv.slice(2)
@@ -9,14 +11,18 @@ async function main() {
   switch (command) {
     case "login": {
       const platform = parseFlag(rest, "--platform") ?? "padsplit"
-      if (platform !== "padsplit") throw new Error(`unknown platform: ${platform}`)
-      await interactiveLogin()
+      if (platform === "padsplit") await interactiveLogin()
+      else if (platform === "airbnb") await airbnbInteractiveLogin()
+      else throw new Error(`unknown platform: ${platform}`)
       log.info("done")
       return
     }
 
     case "check": {
-      await checkPadsplitSession()
+      const platform = parseFlag(rest, "--platform") ?? "padsplit"
+      if (platform === "padsplit") await checkPadsplitSession()
+      else if (platform === "airbnb") await checkAirbnbSession()
+      else throw new Error(`unknown platform: ${platform}`)
       return
     }
 
@@ -46,6 +52,12 @@ async function main() {
 
     case "vault-sync": {
       await processVaultSync()
+      break
+    }
+
+    case "airbnb-sync": {
+      const result = await processAirbnbSync()
+      log.info(result, "airbnb-sync complete")
       break
     }
 
