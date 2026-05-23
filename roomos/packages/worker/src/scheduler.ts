@@ -4,6 +4,7 @@ import { processOccupancy } from "./jobs/padsplit-occupancy"
 import { processFinancials } from "./jobs/padsplit-financials"
 import { processInteractiveLogin } from "./jobs/padsplit-interactive-login"
 import { processVaultSync } from "./jobs/vault-sync"
+import { processAirbnbSync } from "./jobs/airbnb-sync"
 import { log } from "./log"
 import { postHeartbeat } from "./http"
 
@@ -24,7 +25,7 @@ export async function startScheduler(): Promise<void> {
   // running alongside the new one. BullMQ keys repeatables by hash of name+opts.
   const existing = await queue.getRepeatableJobs()
   for (const r of existing) {
-    if (r.name.startsWith("padsplit:") || r.name === "vault-sync") {
+    if (r.name.startsWith("padsplit:") || r.name === "vault-sync" || r.name === "airbnb-sync") {
       await queue.removeRepeatableByKey(r.key)
       log.info({ name: r.name, key: r.key }, "removed pre-existing repeatable")
     }
@@ -42,6 +43,18 @@ export async function startScheduler(): Promise<void> {
     },
   )
 
+  // Phase 2B: Airbnb direct adapter runs every 30 min (independent of PadSplit/vault).
+  await queue.add(
+    "airbnb-sync",
+    {},
+    {
+      repeat: { every: 30 * 60 * 1000 },
+      jobId: "airbnb-sync-recurring",
+      removeOnComplete: 100,
+      removeOnFail: 50,
+    },
+  )
+
   // Phase 2A: PadSplit recurring jobs are unscheduled (commented out).
   // Code kept available for Phase 2B/2C debugging via `pnpm cli run --job <name>`.
   // await queue.add("padsplit:occupancy", {}, { repeat: REPEAT.occupancy, jobId: "repeat:occupancy" })
@@ -51,6 +64,8 @@ export async function startScheduler(): Promise<void> {
   startWorker({
     // Phase 2A: vault-sync is the primary recurring job.
     "vault-sync": processVaultSync,
+    // Phase 2B: Airbnb direct adapter (Playwright scrape → matcher → persist).
+    "airbnb-sync": processAirbnbSync,
     // Phase 2B/2C: PadSplit worker cases kept intact for manual CLI invocation.
     "padsplit:discovery": processDiscovery,
     "padsplit:occupancy": processOccupancy,

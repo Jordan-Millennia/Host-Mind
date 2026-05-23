@@ -17,7 +17,8 @@ export type JobName =
   | "padsplit:occupancy"
   | "padsplit:financials"
   | "padsplit:interactive_login"
-| "vault-sync"
+  | "vault-sync"
+  | "airbnb-sync"
 
 export async function enqueue(name: JobName, data: unknown = {}, opts?: JobsOptions) {
   await queue.add(name, data, opts)
