@@ -9,10 +9,11 @@ export type AirbnbListingRow = {
 }
 
 export type AirbnbBookingRow = {
-  airbnbListingId: string
+  airbnbListingId: string           // "" — the /hosting/reservations table does NOT expose the numeric id
+  listingTitle?: string             // listing NAME as shown in the reservations table; join key bookings→listings by title
   confirmationCode: string          // primary key for occupancy uniqueness
-  guestName: string                 // first name only in host UI
-  guestUserId: string | null        // not always exposed
+  guestName: string                 // full visible name in the reservations table
+  guestUserId: string | null        // from the guest /users/profile/<id> link, when present
   checkIn: string                   // ISO date "2026-05-12"
   checkOut: string                  // ISO date
   status: "confirmed" | "pending" | "canceled" | "completed" | "unknown"
@@ -20,6 +21,7 @@ export type AirbnbBookingRow = {
 
 export type AirbnbTransactionRow = {
   confirmationCode: string          // joins to AirbnbBookingRow
+  listingTitle?: string             // listing NAME from the reservations table (same source as the booking)
   payoutDate: string                // ISO date
   grossAmount: number               // dollars
   netAmount: number                 // dollars (after Airbnb fee)
