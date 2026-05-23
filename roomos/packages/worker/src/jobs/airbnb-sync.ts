@@ -53,7 +53,14 @@ export async function processAirbnbSync(): Promise<AirbnbSyncResult | { skipped:
 
   return withPlaywrightSession("airbnb", async ({ page }: { page: Page }) => {
     // 1. /hosting/listings → the only page that exposes numeric listing ids.
-    const listings = parseHostingListings(await fetchTableHtml(page, LISTINGS_URL))
+    const listingsHtml = await fetchTableHtml(page, LISTINGS_URL)
+    // An expired session bounces to /login; bail loudly rather than parsing an
+    // empty page as "0 listings / 0 reservations" and silently wiping nothing.
+    if (/\/login/.test(page.url())) {
+      log.warn("airbnb-sync: session expired (redirected to /login) — skipping. Re-run 'login --platform airbnb'.")
+      return { skipped: true }
+    }
+    const listings = parseHostingListings(listingsHtml)
 
     // 2. /hosting/reservations/all → one table carrying both bookings and payouts.
     await jitter()

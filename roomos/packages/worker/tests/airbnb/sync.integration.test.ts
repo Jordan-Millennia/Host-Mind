@@ -74,4 +74,50 @@ describe("syncAirbnbWithRows (integration)", () => {
     })
     expect(run?.status).toBe("SUCCESS")
   })
+
+  it("records a landed payout for a booking whose member is keyed by guestUserId (regression: C1)", async () => {
+    const today = new Date().toISOString().slice(0, 10)
+    const future = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10)
+    const listings: AirbnbListingRow[] = [{
+      airbnbListingId: "77001", title: "Guest Home", address: "nowhere",
+      listingType: "entire_home", status: "active",
+    }]
+    // guestUserId set → member is keyed by "9999", NOT "airbnb-guest:HMGUEST1".
+    const bookings: AirbnbBookingRow[] = [{
+      airbnbListingId: "77001", confirmationCode: "HMGUEST1",
+      guestName: "Gary", guestUserId: "9999", checkIn: today, checkOut: future, status: "confirmed",
+    }]
+    const transactions: AirbnbTransactionRow[] = [{
+      confirmationCode: "HMGUEST1", payoutDate: today, grossAmount: 600, netAmount: 540, type: "payout",
+    }]
+
+    const result = await syncAirbnbWithRows({ orgId: ORG_ID, listings, bookings, transactions })
+    expect(result.bookingsUpserted).toBe(1)
+    expect(result.paymentEventsUpserted).toBe(1)
+
+    const member = await prisma.member.findFirst({ where: { orgId: ORG_ID, externalMemberId: "9999" } })
+    expect(member).not.toBeNull()
+    const payments = await prisma.paymentEvent.count({ where: { memberId: member!.id } })
+    expect(payments).toBe(1)
+  })
+
+  it("does NOT record a payout for a future stay that hasn't started (regression: C2)", async () => {
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10)
+    const future = new Date(Date.now() + 6 * 86400000).toISOString().slice(0, 10)
+    const listings: AirbnbListingRow[] = [{
+      airbnbListingId: "77002", title: "Future Home", address: "nowhere2",
+      listingType: "entire_home", status: "active",
+    }]
+    const bookings: AirbnbBookingRow[] = [{
+      airbnbListingId: "77002", confirmationCode: "HMFUTURE1",
+      guestName: "Fiona", guestUserId: "8888", checkIn: tomorrow, checkOut: future, status: "confirmed",
+    }]
+    const transactions: AirbnbTransactionRow[] = [{
+      confirmationCode: "HMFUTURE1", payoutDate: future, grossAmount: 600, netAmount: 540, type: "payout",
+    }]
+
+    const result = await syncAirbnbWithRows({ orgId: ORG_ID, listings, bookings, transactions })
+    expect(result.bookingsUpserted).toBe(1) // MOVING_IN occupancy is created…
+    expect(result.paymentEventsUpserted).toBe(0) // …but the payout hasn't been released yet
+  })
 })

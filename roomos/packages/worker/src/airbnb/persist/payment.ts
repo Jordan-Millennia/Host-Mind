@@ -10,7 +10,12 @@ export type UpsertAirbnbPaymentInput = {
 }
 
 export async function upsertAirbnbPayment(input: UpsertAirbnbPaymentInput): Promise<void> {
-  const externalEventId = `airbnb:${input.transaction.confirmationCode}:${input.transaction.payoutDate}:${input.transaction.type}`
+  // Key on confirmation code + type only — NOT the payout date. The reservations
+  // table approximates payoutDate as the checkout date, which shifts if the guest
+  // changes their dates between syncs; including it would re-insert the same payout
+  // under a new key and double-count. A reservation has at most one payout + one
+  // refund, so (code, type) is the stable natural key.
+  const externalEventId = `airbnb:${input.transaction.confirmationCode}:${input.transaction.type}`
   const existing = await prisma.paymentEvent.findUnique({
     where: { memberId_externalEventId: { memberId: input.memberId, externalEventId } },
   })

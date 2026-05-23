@@ -30,10 +30,21 @@ export function attachListingIdsByTitle(
   listings: AirbnbListingRow[],
   bookings: AirbnbBookingRow[],
 ): AirbnbBookingRow[] {
-  const idByTitle = new Map<string, string>()
+  // Build title → distinct listing ids, then keep only titles that resolve to
+  // exactly ONE listing. Operators sometimes clone a title across units (e.g.
+  // several "Sunny Sarasota Escape" rooms); a colliding title is ambiguous, so we
+  // refuse to map it (leave "") rather than pin a booking to an arbitrary room.
+  const idsByTitle = new Map<string, Set<string>>()
   for (const l of listings) {
     const key = normalizeTitle(l.title)
-    if (key) idByTitle.set(key, l.airbnbListingId)
+    if (!key) continue
+    const set = idsByTitle.get(key) ?? new Set<string>()
+    set.add(l.airbnbListingId)
+    idsByTitle.set(key, set)
+  }
+  const idByTitle = new Map<string, string>()
+  for (const [title, ids] of idsByTitle) {
+    if (ids.size === 1) idByTitle.set(title, ids.values().next().value as string)
   }
   return bookings.map((b) => {
     if (b.airbnbListingId) return b
@@ -93,33 +104,42 @@ export async function syncAirbnbWithRows(input: SyncAirbnbRowsInput): Promise<Ai
       }
     }
 
-    // booking → Occupancy (skip if no listing match)
+    // booking → Occupancy (skip if no listing match). Capture the member +
+    // occupancy each booking resolves to, keyed by confirmation code, so the payout
+    // pass attaches to the correct member WITHOUT re-deriving its key — the guest
+    // member is keyed by `guestUserId` when present, not by `airbnb-guest:<code>`,
+    // so re-derivation would miss every booking that exposed a guest profile link.
+    const payTargetByCode = new Map<string, { memberId: string; occupancyId: string; checkIn: string }>()
     for (const b of input.bookings) {
       const listingId = listingIdByAirbnbId.get(b.airbnbListingId)
       if (!listingId) continue
       try {
-        await upsertAirbnbOccupancyForBooking({ orgId: input.orgId, listingId, booking: b })
-        result.bookingsUpserted++
+        const target = await upsertAirbnbOccupancyForBooking({ orgId: input.orgId, listingId, booking: b })
+        if (target) {
+          payTargetByCode.set(b.confirmationCode, { ...target, checkIn: b.checkIn })
+          result.bookingsUpserted++
+        }
       } catch (err) {
         result.errors.push({ stage: `booking:${b.confirmationCode}`, reason: String((err as Error).message) })
       }
     }
 
-    // transaction → PaymentEvent (find member via occupancy)
+    // transaction → PaymentEvent. Only record payouts whose money has actually
+    // landed: Airbnb releases a host payout ~24h after CHECK-IN, so a stay that has
+    // started (checkIn <= today) has been paid, while future/arriving bookings have
+    // not. Skip non-payout rows (canceled → $0 "adjustment"). The member comes from
+    // the booking pass above (keyed by confirmation code), never re-derived.
+    const today = new Date().toISOString().slice(0, 10)
     for (const t of input.transactions) {
+      if (t.type !== "payout") continue
+      const target = payTargetByCode.get(t.confirmationCode)
+      if (!target) continue // canceled / future / unmatched booking → no money to record
+      if (target.checkIn > today) continue // stay hasn't started → payout not released yet
       try {
-        const occupancy = await prisma.occupancy.findFirst({
-          where: {
-            orgId: input.orgId,
-            member: { platform: "AIRBNB", externalMemberId: `airbnb-guest:${t.confirmationCode}` },
-          },
-          select: { id: true, memberId: true },
-        })
-        if (!occupancy?.memberId) continue
         await upsertAirbnbPayment({
           orgId: input.orgId,
-          memberId: occupancy.memberId,
-          occupancyId: occupancy.id,
+          memberId: target.memberId,
+          occupancyId: target.occupancyId,
           transaction: t,
         })
         result.paymentEventsUpserted++

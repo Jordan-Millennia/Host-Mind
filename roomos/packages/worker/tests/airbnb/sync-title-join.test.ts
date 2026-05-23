@@ -49,6 +49,13 @@ describe("attachListingIdsByTitle", () => {
     expect(b!.airbnbListingId).toBe("")
   })
 
+  it("refuses to map a title shared by two listings (ambiguous → empty, not arbitrary)", () => {
+    // Operators clone titles across units — e.g. several "Sunny Sarasota Escape" rooms.
+    const dupes = [listing("501", "Sunny Sarasota Escape"), listing("502", "Sunny Sarasota Escape")]
+    const [b] = attachListingIdsByTitle(dupes, [booking("Sunny Sarasota Escape")])
+    expect(b!.airbnbListingId).toBe("")
+  })
+
   it("passes through a booking that already carries an id (does not overwrite)", () => {
     const [b] = attachListingIdsByTitle(listings, [booking("Anastasia Island Treehouse", "999")])
     expect(b!.airbnbListingId).toBe("999")
