@@ -61,6 +61,15 @@ async function main() {
       break
     }
 
+    case "build-lock-map": {
+      const locksPath = parseFlag(rest, "--locks")
+      if (!locksPath) throw new Error("usage: build-lock-map --locks <ttlock-export.json>")
+      const { buildLockMap } = await import("./automation/build-lock-map.js")
+      const summary = await buildLockMap(locksPath)
+      log.info(summary, "build-lock-map complete")
+      break
+    }
+
     case "scheduler": {
       const { startScheduler } = await import("./scheduler.js")
       await startScheduler()
