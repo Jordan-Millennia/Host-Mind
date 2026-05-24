@@ -13,6 +13,14 @@ const schema = z.object({
   SLACK_WEBHOOK_URL: z.string().url().optional(),
   WORKER_ID: z.string().min(1).default("mac-studio-default"),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
+
+  // Phase 2C operational automation. Each integration self-disables when its
+  // creds are absent, so the worker boots fine before they're all provisioned.
+  GHL_API_KEY: z.string().optional(),
+  GHL_LOCATION_ID: z.string().optional(),
+  TTLOCK_CLIENT_ID: z.string().optional(),
+  TTLOCK_ACCESS_TOKEN: z.string().optional(),
+  TURNO_API_KEY: z.string().optional(),
 })
 
 export const env = schema.parse(process.env)

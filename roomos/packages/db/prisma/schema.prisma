@@ -160,6 +160,12 @@ model Room {
   name         String?
   roomNumber   String?  @map("room_number")
   maxOccupancy Int      @default(1) @map("max_occupancy")
+
+  // Phase 2C: GHL Room Tracker sync state (opportunity cache + last-synced stage for idempotency)
+  ghlOpportunityId String?   @map("ghl_opportunity_id")
+  ghlStageId       String?   @map("ghl_stage_id")
+  ghlSyncedAt      DateTime? @map("ghl_synced_at")
+
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -241,6 +247,14 @@ model Occupancy {
   lastPaymentAt        DateTime?       @map("last_payment_at")
   lastPaymentAmount    Decimal?        @map("last_payment_amount") @db.Decimal(10, 2)
   lastFinancialSyncAt  DateTime?       @map("last_financial_sync_at")
+
+  // Phase 2C: TTLock access-code + Turno cleaning-job side-effect state (per occupancy)
+  accessCode           String?         @map("access_code")
+  accessCodeId         String?         @map("access_code_id")
+  accessCodeLockId     String?         @map("access_code_lock_id")
+  accessCodeSyncedAt   DateTime?       @map("access_code_synced_at")
+  turnoJobId           String?         @map("turno_job_id")
+  turnoJobCreatedAt    DateTime?       @map("turno_job_created_at")
 
   scrapedAt            DateTime?       @map("scraped_at")
   createdAt            DateTime        @default(now()) @map("created_at")
