@@ -64,6 +64,7 @@ enum FlagSource {
   AIRBNB
   REI_HUB
   MANUAL
+  EMAIL
 }
 
 enum SyncRunStatus {
@@ -76,6 +77,12 @@ enum SyncRunStatus {
 enum PaymentEventType {
   PAYMENT
   ADJUSTMENT
+}
+
+enum EmailEventStatus {
+  PARSED      // matched a parser + persisted
+  UNHANDLED   // no parser matched (logged for follow-up, not retried)
+  ERROR       // parser matched but persist failed
 }
 
 // =====================================================================
@@ -100,6 +107,7 @@ model Org {
   workerHeartbeats  WorkerHeartbeat[]
   teamInvitations   TeamInvitation[]
   propertyFlags     PropertyFlag[]
+  emailEvents       EmailEvent[]
 
   @@map("orgs")
 }
@@ -409,4 +417,26 @@ model TeamInvitation {
 
   @@index([orgId, status])
   @@map("team_invitations")
+}
+
+// =====================================================================
+// Email ingest (real-time feed; audit + idempotency for the GAS forwarder)
+// =====================================================================
+
+model EmailEvent {
+  id          String           @id @default(cuid())
+  orgId       String           @map("org_id")
+  messageId   String           @unique @map("message_id") // Gmail message id — idempotency key
+  source      String                                       // "padsplit" | "airbnb" | …
+  type        String                                       // "move_in" | "move_out" | "payout" | "maintenance" | …
+  status      EmailEventStatus @default(PARSED)
+  parsedJson  Json?            @map("parsed_json")
+  receivedAt  DateTime?        @map("received_at")
+  processedAt DateTime         @default(now()) @map("processed_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  org Org @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, status])
+  @@map("email_events")
 }
