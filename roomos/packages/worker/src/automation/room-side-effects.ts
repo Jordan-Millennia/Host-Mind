@@ -5,19 +5,22 @@
 //   • Turno cleaning job         (per fresh checkout)
 //
 // Design rules: idempotent + self-healing (acts only on a real diff), date-gated
-// so a first run can't flood TTLock/Turno with historical stays, and totally
-// non-throwing — a side-effect failure must never break the sync that called it.
+// so a first run can't flood TTLock/Turno with historical stays, per-pass capped so
+// a full lock-map can't burst the gateway, and non-throwing — a side-effect failure
+// must never break the sync that called it.
 
 import { prisma } from "@roomos/db"
-import type { OccupancyStatus, Platform } from "@roomos/db"
 import { log } from "../log"
 import { ghlStageForRoom, ghlOpportunityName, normalizeOppName, MOVING_OUT_WINDOW_DAYS, type GhlStageKey } from "./ghl-stages"
 import { ghlEnabled, fetchOpportunityIndex, updateOpportunityStage } from "./ghl"
 import { ttlockEnabled, lockIdForRoom, createAccessCode, deleteAccessCode, codeWindow, generatePin } from "./ttlock"
 import { turnoEnabled, createCleaningJob } from "./turno"
+import { ACTIVE_STATUSES, utcDay, currentOccupancy, type Occ } from "./occupancy-select"
 
 const DAY_MS = 86_400_000
-const ACTIVE_STATUSES: OccupancyStatus[] = ["OCCUPIED", "MOVING_IN", "MOVING_OUT", "WAITING_APPROVAL", "NEEDS_FLIP"]
+// Cap TTLock provisioning per reconcile so a freshly-populated lock-map can't burst
+// the gateway / hit rate limits; the backlog drains over subsequent passes (~15 min).
+const MAX_CODES_PER_PASS = 25
 
 export type SideEffectResult = {
   ghlUpdated: number
@@ -25,18 +28,6 @@ export type SideEffectResult = {
   codesDeleted: number
   cleaningJobsCreated: number
   errors: { stage: string; reason: string }[]
-}
-
-type Occ = {
-  id: string
-  status: OccupancyStatus
-  moveInDate: Date | null
-  leaseEndDate: Date | null
-  guestName: string
-  platform: Platform
-  accessCodeId: string | null
-  accessCodeLockId: string | null
-  turnoJobId: string | null
 }
 
 type RoomRow = {
@@ -48,22 +39,6 @@ type RoomRow = {
   occupancies: Occ[]
 }
 
-function utcDay(d: Date): number {
-  return Date.parse(d.toISOString().slice(0, 10))
-}
-
-/** Latest active occupancy (by move-in) wins as the room's "current" tenancy. */
-function currentOccupancy(occs: Occ[]): Occ | null {
-  const active = occs
-    .filter((o) => ACTIVE_STATUSES.includes(o.status))
-    .filter((o) => {
-      const end = o.leaseEndDate ? utcDay(o.leaseEndDate) : null
-      return end === null || end >= utcDay(new Date())
-    })
-  active.sort((a, b) => (b.moveInDate?.getTime() ?? 0) - (a.moveInDate?.getTime() ?? 0))
-  return active[0] ?? null
-}
-
 export async function reconcileRoomSideEffects(orgId: string): Promise<SideEffectResult> {
   const result: SideEffectResult = { ghlUpdated: 0, codesCreated: 0, codesDeleted: 0, cleaningJobsCreated: 0, errors: [] }
   if (!ghlEnabled() && !ttlockEnabled() && !turnoEnabled()) return result
@@ -71,55 +46,67 @@ export async function reconcileRoomSideEffects(orgId: string): Promise<SideEffec
   const todayMid = utcDay(new Date())
   const twoDaysAgo = new Date(todayMid - 2 * DAY_MS)
 
-  const roomsRaw = await prisma.room.findMany({
-    where: { orgId },
-    select: {
-      id: true,
-      roomNumber: true,
-      ghlStageId: true,
-      ghlOpportunityId: true,
-      property: { select: { address: true } },
-      listings: {
-        select: {
-          platform: true,
-          occupancies: {
-            where: {
-              OR: [{ leaseEndDate: { gte: twoDaysAgo } }, { leaseEndDate: null }, { accessCodeId: { not: null } }],
-            },
-            orderBy: { moveInDate: "desc" },
-            select: {
-              id: true, status: true, moveInDate: true, leaseEndDate: true, accessCodeId: true,
-              accessCodeLockId: true, turnoJobId: true, member: { select: { name: true } },
+  // Loading the working set is the one un-sectioned step; wrap it so a DB blip
+  // logs + skips the pass rather than rejecting (preserves the never-throw contract).
+  let rooms: RoomRow[]
+  try {
+    const roomsRaw = await prisma.room.findMany({
+      where: { orgId },
+      select: {
+        id: true,
+        roomNumber: true,
+        ghlStageId: true,
+        ghlOpportunityId: true,
+        property: { select: { address: true } },
+        listings: {
+          select: {
+            platform: true,
+            occupancies: {
+              where: {
+                OR: [{ leaseEndDate: { gte: twoDaysAgo } }, { leaseEndDate: null }, { accessCodeId: { not: null } }],
+              },
+              orderBy: { moveInDate: "desc" },
+              select: {
+                id: true, status: true, moveInDate: true, leaseEndDate: true, createdAt: true,
+                accessCodeId: true, accessCodeLockId: true, turnoJobId: true, member: { select: { name: true } },
+              },
             },
           },
         },
       },
-    },
-  })
+    })
+    rooms = roomsRaw.map((r) => ({
+      id: r.id,
+      roomNumber: r.roomNumber,
+      address: r.property.address,
+      ghlStageId: r.ghlStageId,
+      ghlOpportunityId: r.ghlOpportunityId,
+      occupancies: r.listings.flatMap((l) =>
+        l.occupancies.map((o) => ({
+          id: o.id,
+          status: o.status,
+          moveInDate: o.moveInDate,
+          leaseEndDate: o.leaseEndDate,
+          createdAt: o.createdAt,
+          guestName: o.member?.name ?? "Guest",
+          platform: l.platform,
+          accessCodeId: o.accessCodeId,
+          accessCodeLockId: o.accessCodeLockId,
+          turnoJobId: o.turnoJobId,
+        })),
+      ),
+    }))
+  } catch (err) {
+    log.warn({ orgId, err: (err as Error).message }, "room side-effects: room load failed — skipping pass")
+    result.errors.push({ stage: "reconcile:load", reason: String((err as Error).message) })
+    return result
+  }
 
-  const rooms: RoomRow[] = roomsRaw.map((r) => ({
-    id: r.id,
-    roomNumber: r.roomNumber,
-    address: r.property.address,
-    ghlStageId: r.ghlStageId,
-    ghlOpportunityId: r.ghlOpportunityId,
-    occupancies: r.listings.flatMap((l) =>
-      l.occupancies.map((o) => ({
-        id: o.id,
-        status: o.status,
-        moveInDate: o.moveInDate,
-        leaseEndDate: o.leaseEndDate,
-        guestName: o.member?.name ?? "Guest",
-        platform: l.platform,
-        accessCodeId: o.accessCodeId,
-        accessCodeLockId: o.accessCodeLockId,
-        turnoJobId: o.turnoJobId,
-      })),
-    ),
-  }))
-
-  // Load the GHL opportunity index once for the whole pass.
+  // Load the GHL opportunity index once for the whole pass (fetchOpportunityIndex is
+  // internally defensive and never throws).
   const oppIndex = ghlEnabled() ? await fetchOpportunityIndex() : null
+
+  let codesCreatedThisPass = 0
 
   for (const room of rooms) {
     const current = currentOccupancy(room.occupancies)
@@ -154,30 +141,43 @@ export async function reconcileRoomSideEffects(orgId: string): Promise<SideEffec
     // ---- TTLock codes ----
     if (ttlockEnabled()) {
       const lockId = lockIdForRoom(room.address, room.roomNumber)
-      // Create: current active stay, lock mapped, no code yet.
-      if (lockId && current && !current.accessCodeId && current.moveInDate && current.leaseEndDate) {
+
+      // Create: current active stay, lock mapped, no code yet, under the per-pass cap.
+      if (
+        lockId && current && !current.accessCodeId && current.moveInDate && current.leaseEndDate &&
+        codesCreatedThisPass < MAX_CODES_PER_PASS
+      ) {
+        const { startMs, endMs } = codeWindow(current.moveInDate, current.leaseEndDate)
+        let code = null
         try {
-          const { startMs, endMs } = codeWindow(current.moveInDate, current.leaseEndDate)
-          const pin = generatePin()
-          const code = await createAccessCode({
+          code = await createAccessCode({
             lockId,
             name: `${ghlOpportunityName(room.address, room.roomNumber)} — ${current.guestName}`.slice(0, 32),
-            pin,
+            pin: generatePin(),
             startMs,
             endMs,
           })
-          if (code) {
+        } catch (err) {
+          result.errors.push({ stage: `ttlock-create:${room.id}`, reason: String((err as Error).message) })
+        }
+        if (code) {
+          codesCreatedThisPass++ // count the physical write even if the DB record below fails
+          try {
             await prisma.occupancy.update({
               where: { id: current.id },
               data: { accessCode: code.keyboardPwd, accessCodeId: code.keyboardPwdId, accessCodeLockId: lockId, accessCodeSyncedAt: new Date() },
             })
             result.codesCreated++
+          } catch (err) {
+            // The PIN is live on the lock but we couldn't persist it. Roll it back so we
+            // don't leak an untracked code (which would also double-create next pass).
+            await deleteAccessCode({ lockId, keyboardPwdId: code.keyboardPwdId }).catch(() => {})
+            result.errors.push({ stage: `ttlock-persist:${current.id}`, reason: String((err as Error).message) })
           }
-        } catch (err) {
-          result.errors.push({ stage: `ttlock-create:${room.id}`, reason: String((err as Error).message) })
         }
       }
-      // Delete: any loaded occupancy that has a code but is no longer the active stay (ended/replaced).
+
+      // Delete: any loaded occupancy that has a code but is no longer the active stay.
       for (const o of room.occupancies) {
         const isEnded = o.leaseEndDate ? utcDay(o.leaseEndDate) < todayMid : false
         const replaced = current?.id !== o.id

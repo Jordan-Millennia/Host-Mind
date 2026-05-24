@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { ghlStageForRoom, ghlOpportunityName, normalizeOppName } from "../../src/automation/ghl-stages"
 import { codeWindow, generatePin } from "../../src/automation/access-window"
+import { currentOccupancy, type Occ } from "../../src/automation/occupancy-select"
 
 // All pure — no env, no DB, no network.
 
@@ -59,5 +60,38 @@ describe("codeWindow + generatePin", () => {
 
   it("generatePin returns a 6-digit string", () => {
     for (let i = 0; i < 50; i++) expect(generatePin()).toMatch(/^\d{6}$/)
+  })
+})
+
+describe("currentOccupancy", () => {
+  const occ = (over: Partial<Occ> & { id: string }): Occ => ({
+    status: "OCCUPIED",
+    moveInDate: null,
+    leaseEndDate: null,
+    createdAt: new Date("2026-01-01T00:00:00Z"),
+    guestName: "G",
+    platform: "PADSPLIT",
+    accessCodeId: null,
+    accessCodeLockId: null,
+    turnoJobId: null,
+    ...over,
+  })
+
+  it("picks the active stay with the latest move-in", () => {
+    const a = occ({ id: "a", moveInDate: new Date("2026-05-01T00:00:00Z") })
+    const b = occ({ id: "b", moveInDate: new Date("2026-05-10T00:00:00Z") })
+    expect(currentOccupancy([a, b])?.id).toBe("b")
+  })
+
+  it("prefers a freshly-created stay with no move-in date over an older dated stay (regression: C2)", () => {
+    const older = occ({ id: "old", moveInDate: new Date("2026-05-01T00:00:00Z"), createdAt: new Date("2026-05-01T00:00:00Z") })
+    const fresh = occ({ id: "new", moveInDate: null, createdAt: new Date("2026-05-20T00:00:00Z") })
+    expect(currentOccupancy([older, fresh])?.id).toBe("new")
+  })
+
+  it("ignores ended and inactive stays", () => {
+    const ended = occ({ id: "ended", leaseEndDate: new Date("2020-01-01T00:00:00Z") })
+    const inactive = occ({ id: "inactive", status: "INACTIVE" })
+    expect(currentOccupancy([ended, inactive])).toBeNull()
   })
 })

@@ -87,4 +87,5 @@ Once the web app is live on Railway:
   rebuilt, refresh them in `ghl-stages.ts`.
 - First reconcile is **date-gated**: TTLock codes only for stays with `leaseEnd >= today`,
   Turno jobs only for checkouts within the last 2 days — so go-live won't flood either system
-  with historical stays.
+  with historical stays. New TTLock codes are additionally **capped at 25 per reconcile**, so a
+  freshly-populated lock-map rolls out over a few 15-min passes instead of bursting the gateway.

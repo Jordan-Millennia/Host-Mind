@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto"
 import { prisma } from "@roomos/db"
 
 // Turno fires this when a cleaning job changes state. On completion we mark the
@@ -5,12 +6,15 @@ import { prisma } from "@roomos/db"
 // pushes VACANT, and post an internal heads-up. Prisma needs the node runtime.
 export const runtime = "nodejs"
 
-/** Shared-secret gate. A data-mutating webhook is never left open. */
+/** Shared-secret gate (constant-time). A data-mutating webhook is never left open. */
 function authorized(req: Request): { ok: boolean; configured: boolean } {
   const secret = process.env.TURNO_WEBHOOK_SECRET
   if (!secret) return { ok: false, configured: false }
-  const provided = req.headers.get("x-turno-secret") ?? new URL(req.url).searchParams.get("secret")
-  return { ok: provided === secret, configured: true }
+  const provided = req.headers.get("x-turno-secret") ?? new URL(req.url).searchParams.get("secret") ?? ""
+  const a = Buffer.from(provided)
+  const b = Buffer.from(secret)
+  const ok = a.length === b.length && timingSafeEqual(a, b)
+  return { ok, configured: true }
 }
 
 async function notify(message: string): Promise<void> {
@@ -40,6 +44,9 @@ export async function POST(req: Request): Promise<Response> {
   // Only act on completion-like states; ack everything else so Turno stops retrying.
   if (!/complete|done|finished/.test(status)) return Response.json({ ok: true, ignored: status })
 
+  // Lookup is by Turno's job id (not org-scoped): CoHost is single-org today and the
+  // shared-secret gate above is the trust boundary. If this ever goes multi-tenant,
+  // issue a per-org webhook secret and scope this query by the org it identifies.
   const occupancy = await prisma.occupancy.findFirst({
     where: { turnoJobId: jobId },
     select: { id: true, listing: { select: { room: { select: { id: true, roomNumber: true, property: { select: { address: true } } } } } } },
