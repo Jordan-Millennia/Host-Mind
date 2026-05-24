@@ -15,6 +15,9 @@ out/
 .claude/settings.local.json
 .superpowers/
 
+# Phase 2C: operator's real TTLock lock-map (lock ids); example stays tracked
+**/config/lock-map.json
+
 # TypeScript / build artifacts
 *.tsbuildinfo
 
