@@ -6,6 +6,7 @@ import { airbnbSessionExists } from "../airbnb/session"
 import { parseHostingListings } from "../airbnb/parsers/listings"
 import { parseAirbnbBookings, parseAirbnbTransactions } from "../airbnb/parsers/reservations"
 import { attachListingIdsByTitle, syncAirbnbWithRows } from "../airbnb/sync"
+import { reconcileRoomSideEffects } from "../automation/room-side-effects"
 import type { AirbnbSyncResult } from "../airbnb/types"
 
 // NOTE on URLs (verified against Jordan's live host account, 2026-05): the spec's
@@ -51,14 +52,14 @@ export async function processAirbnbSync(): Promise<AirbnbSyncResult | { skipped:
   }
   const org = await getOrg()
 
-  return withPlaywrightSession("airbnb", async ({ page }: { page: Page }) => {
+  const result = await withPlaywrightSession("airbnb", async ({ page }: { page: Page }) => {
     // 1. /hosting/listings → the only page that exposes numeric listing ids.
     const listingsHtml = await fetchTableHtml(page, LISTINGS_URL)
     // An expired session bounces to /login; bail loudly rather than parsing an
     // empty page as "0 listings / 0 reservations" and silently wiping nothing.
     if (/\/login/.test(page.url())) {
       log.warn("airbnb-sync: session expired (redirected to /login) — skipping. Re-run 'login --platform airbnb'.")
-      return { skipped: true }
+      return { skipped: true as const }
     }
     const listings = parseHostingListings(listingsHtml)
 
@@ -74,4 +75,13 @@ export async function processAirbnbSync(): Promise<AirbnbSyncResult | { skipped:
     log.info({ result }, "airbnb-sync: complete")
     return result
   })
+
+  // After the browser session closes, fire GHL / TTLock / Turno side-effects off
+  // the refreshed occupancy state. Skip when the sync itself was skipped.
+  if (!(result as { skipped?: boolean }).skipped) {
+    await reconcileRoomSideEffects(org.id).catch((err) =>
+      log.warn({ err: (err as Error).message }, "airbnb-sync: side-effect reconcile failed"),
+    )
+  }
+  return result
 }
