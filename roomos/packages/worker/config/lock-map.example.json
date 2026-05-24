@@ -1,0 +1,6 @@
+{
+  "__comment": "Copy to lock-map.json (same dir, or set LOCK_MAP_PATH). Keys are 'Street — Room N' (em dash), matching the GHL opportunity naming. Values are TTLock lockId. A room with no entry simply gets no auto-codes. Claude can build this for you from the live TTLock account via the TTLock MCP (ttlock_list_locks).",
+  "7728 Linkside Loop — Room 1": "1234567",
+  "7728 Linkside Loop — Room 2": "1234568",
+  "503 Arricola Avenue — Room 1": "2345678"
+}
