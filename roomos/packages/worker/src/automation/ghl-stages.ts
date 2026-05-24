@@ -84,5 +84,6 @@ export function normalizeOppName(name: string): string {
     .replace(/\broom\b/g, "room")
     .replace(/[^a-z0-9 ]/g, "")
     .replace(/\s+/g, " ")
+    .replace(/\broom r(\d+)\b/g, "room $1") // bridge RoomOS "Room R5" <-> GHL "Room 5"
     .trim()
 }

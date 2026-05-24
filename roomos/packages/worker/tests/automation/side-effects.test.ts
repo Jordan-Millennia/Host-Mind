@@ -46,6 +46,11 @@ describe("ghlOpportunityName + normalizeOppName", () => {
     expect(normalizeOppName("123 Main St — Room 5")).toBe(normalizeOppName("123 main st - room 5"))
     expect(normalizeOppName("123 Main St — Room 5")).not.toBe(normalizeOppName("123 Main St — Room 6"))
   })
+
+  it("bridges RoomOS 'Room R5' and GHL 'Room 5'", () => {
+    expect(normalizeOppName("8591 Lowell Blvd — Room R5")).toBe(normalizeOppName("8591 Lowell Blvd — Room 5"))
+    expect(normalizeOppName("8591 Lowell Blvd — Room R10")).toBe(normalizeOppName("8591 Lowell Blvd — Room 10"))
+  })
 })
 
 describe("codeWindow + generatePin", () => {
